@@ -6,13 +6,13 @@ SDL2 toolkit for Go
 [![Documentation][doc-img]][doc-url]
 
 [latest-release-img]: https://img.shields.io/github/release/roeldev/go-sdl2-kit.svg?label=latest
-[latest-release-url]: https://github.com/roeldev/go-sdl2-kit/releases
-[build-status-img]: https://github.com/roeldev/go-sdl2-kit/workflows/Go/badge.svg
-[build-status-url]: https://github.com/roeldev/go-sdl2-kit/actions?query=workflow%3AGo
-[report-img]: https://goreportcard.com/badge/github.com/roeldev/go-sdl2-kit
-[report-url]: https://goreportcard.com/report/github.com/roeldev/go-sdl2-kit
-[doc-img]: https://godoc.org/github.com/roeldev/go-sdl2-kit?status.svg
-[doc-url]: https://pkg.go.dev/github.com/roeldev/go-sdl2-kit
+[latest-release-url]: https://github.com/go-pogo/sdlkit/releases
+[build-status-img]: https://github.com/go-pogo/sdlkit/workflows/Go/badge.svg
+[build-status-url]: https://github.com/go-pogo/sdlkit/actions?query=workflow%3AGo
+[report-img]: https://goreportcard.com/badge/github.com/go-pogo/sdlkit
+[report-url]: https://goreportcard.com/report/github.com/go-pogo/sdlkit
+[doc-img]: https://godoc.org/github.com/go-pogo/sdlkit?status.svg
+[doc-url]: https://pkg.go.dev/github.com/go-pogo/sdlkit
 
 
 Package `sdlkit` contains basic building blocks when using `SDL2` with go.
@@ -21,10 +21,10 @@ This package is not a game or physics engine.
 
 
 ```sh
-go get github.com/roeldev/go-sdl2-kit
+go get github.com/go-pogo/sdlkit
 ```
 ```go
-import "github.com/roeldev/go-sdl2-kit"
+import "github.com/go-pogo/sdlkit"
 ```
 
 
