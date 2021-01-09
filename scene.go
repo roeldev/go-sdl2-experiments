@@ -6,13 +6,14 @@ package sdlkit
 
 import (
 	"github.com/go-pogo/errors"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 type Scene interface {
 	// scene bepaalt zelf hoe die events afhandelt
 	Process() error
 	Update()
-	Render(rt RenderTarget) error
+	Render(r *sdl.Renderer) error
 }
 
 //goland:noinspection SpellCheckingInspection

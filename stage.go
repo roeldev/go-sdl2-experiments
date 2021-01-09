@@ -54,7 +54,6 @@ type Stage struct {
 
 	window   *sdl.Window
 	renderer *sdl.Renderer
-	target   *StageRenderTarget
 	viewport *Viewport
 	time     *Time
 	clock    *Clock
@@ -101,7 +100,6 @@ func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error)
 	}
 
 	stage.ctx, stage.cfn = context.WithCancel(opts.Context)
-	stage.target = &StageRenderTarget{stage: stage}
 	stage.time.LimitFps = opts.LimitFps
 	// stage.renderer.SetLogicalSize(width, height)
 
@@ -121,8 +119,6 @@ func (s *Stage) Window() *sdl.Window { return s.window }
 // Renderer returns the sdl.Renderer that's attached to the window.
 func (s *Stage) Renderer() *sdl.Renderer { return s.renderer }
 
-func (s *Stage) RenderTarget() *StageRenderTarget { return s.target }
-
 // Viewport returns the current visible area within the window.
 func (s *Stage) Viewport() *Viewport { return s.viewport }
 
@@ -140,6 +136,20 @@ func (s *Stage) Scene() Scene {
 
 func (s *Stage) AddScene(name string, scene Scene) {
 	s.scenes.Add(name, scene, s.scenes.ActiveSceneName() == "")
+}
+
+func (s *Stage) ClearScreen() error {
+	var err error
+	errors.Append(&err,
+		s.renderer.SetDrawColor(
+			s.BgColor.R,
+			s.BgColor.G,
+			s.BgColor.B,
+			0xFF,
+		),
+		s.renderer.Clear(),
+	)
+	return err
 }
 
 func (s *Stage) PresentScreen() { s.renderer.Present() }

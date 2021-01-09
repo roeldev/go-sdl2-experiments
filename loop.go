@@ -6,7 +6,8 @@ package sdlkit
 
 func RunLoop(stage *Stage) error {
 	sceneManager := stage.SceneManager()
-	renderTarget := stage.RenderTarget()
+	renderer := stage.Renderer()
+
 	scene := stage.Scene()
 	timer := stage.Time().Init()
 
@@ -29,11 +30,10 @@ func RunLoop(stage *Stage) error {
 		scene.Update()
 
 		// render to screen
-		renderTarget.Clear()
-		if err := scene.Render(renderTarget); err != nil {
+		if err := stage.ClearScreen(); err != nil {
 			return err
 		}
-		if err := renderTarget.Err(); err != nil {
+		if err := scene.Render(renderer); err != nil {
 			return err
 		}
 
