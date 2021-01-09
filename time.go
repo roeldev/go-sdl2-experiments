@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-pogo/errors"
 	sdlgfx "github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
 
@@ -18,6 +19,8 @@ const (
 	DefaultFps       uint8   = 60
 	DefaultTimeScale float32 = 1.0
 )
+
+var fsec = float32(time.Second)
 
 type Clock struct {
 	time *Time
@@ -41,11 +44,11 @@ func NewClock() *Clock {
 func (c *Clock) Time() *Time { return c.time }
 
 func (c *Clock) Pause() {
-
+	// todo: implement pause
 }
 
 func (c *Clock) Unpause() {
-
+	// todo: implement unpause
 }
 
 type Time struct {
@@ -67,8 +70,6 @@ type Time struct {
 	avgPerSec avgFps
 	avgPerMin avgFps
 
-	display *fpsDisplay
-
 	LimitFps bool
 }
 
@@ -77,6 +78,7 @@ func NewTime(targetFps uint8, clock ...*Clock) *Time {
 		avgPerSec: avgFps{after: time.Second / 2, current: float32(targetFps)},
 		avgPerMin: avgFps{after: time.Second * 30},
 		clocks:    clock,
+		prevTick:  time.Now(),
 	}
 
 	t.SetTargetFps(targetFps)
@@ -104,15 +106,15 @@ func (t *Time) Fps() float32 { return t.avgPerSec.current }
 // AvgFps returns the average FPS of the last 30 seconds.
 func (t *Time) AvgFps() float32 { return t.avgPerMin.current }
 
-// Delta returns the current delta time value
+// Delta returns the current delta time value.
 func (t *Time) Delta() float32 { return t.delta }
+
+func (t *Time) Elapsed() time.Duration { return t.elapsed }
 
 func (t *Time) Init() *Time {
 	t.prevTick = time.Now()
 	return t
 }
-
-var fsec = float32(time.Second)
 
 func (t *Time) Tick() float32 {
 	now := time.Now()
@@ -139,18 +141,16 @@ func (t *Time) Tick() float32 {
 	return t.delta
 }
 
-func (t *Time) Display(x, y float32) Drawable {
-	if t.display == nil {
-		t.display = &fpsDisplay{
-			clock: t,
-			scale: 2,
-			color: sdl.Color{R: 255, G: 255, B: 255, A: 255},
-		}
+func (t *Time) CreateDisplay(x, y float32) *FpsDisplay {
+	display := &FpsDisplay{
+		time:        t,
+		Scale:       2,
+		TextColor:   sdl.Color{R: 255, G: 255, B: 255, A: 255},
+		ShadowColor: sdl.Color{A: 100},
 	}
-
-	t.display.X = x
-	t.display.Y = y
-	return t.display
+	display.X = x
+	display.Y = y
+	return display
 }
 
 func (t *Time) String() string {
@@ -158,6 +158,39 @@ func (t *Time) String() string {
 		return t.avgPerSec.String()
 	}
 	return t.avgPerMin.String()
+}
+
+type FpsDisplay struct {
+	geom.Point
+	time *Time
+
+	Scale       float32
+	TextColor   sdl.Color
+	ShadowColor sdl.Color
+}
+
+func (d *FpsDisplay) Draw(r *sdl.Renderer) (err error) {
+	var x, y int32
+	var sx, sy float32
+
+	if d.Scale > 1 {
+		sx, sy = r.GetScale()
+		errors.Append(&err, r.SetScale(d.Scale, d.Scale))
+		x = int32(d.Point.X / d.Scale)
+		y = int32(d.Point.Y / d.Scale)
+	} else {
+		x = int32(d.Point.X)
+		y = int32(d.Point.Y)
+	}
+
+	fps := fmt.Sprintf("%.2f", d.time.Fps())
+	sdlgfx.StringColor(r, x+1, x+1, fps, d.ShadowColor) // shadow
+	sdlgfx.StringColor(r, x, y, fps, d.TextColor)
+
+	if d.Scale > 1 {
+		errors.Append(&err, r.SetScale(sx, sy))
+	}
+	return err
 }
 
 type avgFps struct {
@@ -192,25 +225,4 @@ func (f *avgFps) update(elapsed time.Duration) {
 
 func (f *avgFps) String() string {
 	return fmt.Sprintf("fps: %.2f, high: %.2f, low: %.2f", f.current, f.highest, f.lowest)
-}
-
-type fpsDisplay struct {
-	geom.Pos
-	clock *Time
-	scale float32
-	color sdl.Color
-}
-
-func (d *fpsDisplay) Draw(r *sdl.Renderer) error {
-	sx, sy := r.GetScale()
-	_ = r.SetScale(d.scale, d.scale)
-
-	x := int32(d.Pos.X / d.scale)
-	y := int32(d.Pos.Y / d.scale)
-
-	fps := fmt.Sprintf("%.2f", d.clock.Fps())
-	sdlgfx.StringRGBA(r, x+1, x+1, fps, 0, 0, 0, 100)
-	sdlgfx.StringColor(r, x, y, fps, d.color)
-
-	return r.SetScale(sx, sy)
 }
