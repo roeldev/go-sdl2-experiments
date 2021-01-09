@@ -11,7 +11,7 @@ import (
 )
 
 type Sprite struct {
-	geom.Pos // center of sprite
+	geom.Point // center of sprite
 	geom.Transform
 	Flip   sdl.RendererFlip
 	Bounds geom.Bounds
@@ -37,7 +37,7 @@ func NewSprite(tx *sdl.Texture, w, h int32) (*Sprite, error) {
 }
 
 func (s *Sprite) Update(_ float32) {
-	s.Bounds.Transform(s.Pos, s.Transform)
+	s.Bounds.Transform(s.Point, s.Transform)
 }
 
 func (s *Sprite) Draw(r *sdl.Renderer) error {

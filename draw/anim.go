@@ -13,7 +13,7 @@ import (
 // https://docs.godotengine.org/en/stable/classes/class_spriteframes.html#class-spriteframes
 
 type AnimSprite struct {
-	geom.Pos // center of sprite
+	geom.Point // center of sprite
 	geom.Transform
 	sdlkit.TextureDisplay
 	Bounds geom.Bounds
@@ -57,7 +57,7 @@ func (a *AnimSprite) Rewind() {
 }
 
 func (a *AnimSprite) Update(dt float32) {
-	a.Bounds.Transform(a.Pos, a.Transform)
+	a.Bounds.Transform(a.Point, a.Transform)
 
 	if a.done {
 		return
@@ -85,7 +85,7 @@ func (a *AnimSprite) Draw(r *sdl.Renderer) (err error) {
 		err = DrawTexture(r, tx, &src, &a.Bounds.Rect, a.Transform, a.TextureDisplay)
 	}
 
-	debug.DrawPos(r, a.Pos)
+	debug.DrawPos(r, a.Point)
 	debug.DrawBounds(r, a.Bounds)
 
 	return err

@@ -22,24 +22,24 @@ func RectBounds(w, h int32) Bounds {
 	}
 }
 
-func (b *Bounds) Update(pos Pos) {
+func (b *Bounds) Update(pos Point) {
 	b.X = int32(pos.X - (float32(b.origW) / 2))
 	b.Y = int32(pos.Y - (float32(b.origH) / 2))
 	b.W = b.origW
 	b.H = b.origH
 }
 
-func (b *Bounds) Transform(pos Pos, t Transform) {
+func (b *Bounds) Transform(pos Point, tr Transform) {
 	var w, h float32
-	if t.ScaleX != 0 {
-		w = float32(b.origW) * t.ScaleX
+	if tr.ScaleX != 0 && tr.ScaleX != 1 {
+		w = float32(b.origW) * tr.ScaleX
 		b.W = int32(w)
 	} else {
 		w = float32(b.origW)
 		b.W = b.origW
 	}
-	if t.ScaleY != 0 {
-		h = float32(b.origH) * t.ScaleY
+	if tr.ScaleY != 0 && tr.ScaleY != 1 {
+		h = float32(b.origH) * tr.ScaleY
 		b.H = int32(h)
 	} else {
 		h = float32(b.origH)
