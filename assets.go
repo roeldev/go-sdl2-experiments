@@ -1,3 +1,7 @@
+// Copyright (c) 2021, Roel Schut. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package sdlkit
 
 import (
@@ -73,7 +77,7 @@ func (l *AssetsLoader) Texture(file string) (*sdl.Texture, error) {
 		return nil, errors.Trace(err)
 	}
 	if l.Textures != nil {
-		(*l.Textures)[file] = tx
+		l.Textures.Add(file, tx)
 	}
 	return tx, nil
 }
@@ -84,12 +88,7 @@ func (l *AssetsLoader) TextureAtlas(file string, subs map[string]sdl.Rect) (*Tex
 		return nil, errors.Trace(err)
 	}
 
-	atlas := NewTextureAtlas(tx, false)
-	for name, sub := range subs {
-		atlas.Add(name, sdl.Rect{X: sub.X, Y: sub.Y, W: sub.W, H: sub.H})
-	}
-
-	return atlas, nil
+	return NewTextureAtlas(tx, subs), nil
 }
 
 func (l *AssetsLoader) TextureAtlasXml(file string) (*TextureAtlas, error) {
@@ -122,13 +121,13 @@ func (l *AssetsLoader) TextureAtlasXml(file string) (*TextureAtlas, error) {
 	return a, errors.Trace(err)
 }
 
-func (l *AssetsLoader) TextureAtlasU(file string, w, h int32, total uint8) (*TextureAtlas, error) {
+func (l *AssetsLoader) UniformTextureAtlas(file string, w, h int32, total uint8) (*TextureAtlas, error) {
 	tx, err := l.Texture(file)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	a, err := NewTextureAtlasU(tx, w, h, total)
+	a, err := NewUniformTextureAtlas(tx, w, h, total)
 	return a, errors.Trace(err)
 }
 
