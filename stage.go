@@ -9,6 +9,7 @@ import (
 	"image/color"
 
 	"github.com/go-pogo/errors"
+	sdlimg "github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -39,9 +40,8 @@ type StageOpts struct {
 	RendererIndex int
 	RendererFlags uint32
 
-	// change to []byte when go 1.16 with embed support is available
-	Icon    *sdl.Surface // see https://wiki.libsdl.org/SDL_SetWindowIcon
-	BgColor color.Color  // see https://wiki.libsdl.org/SDL_RenderClear
+	Icon    []byte      // see https://wiki.libsdl.org/SDL_SetWindowIcon
+	BgColor color.Color // see https://wiki.libsdl.org/SDL_RenderClear
 
 	// timer
 	TargetFps uint8
@@ -62,6 +62,8 @@ type Stage struct {
 	BgColor color.RGBA
 }
 
+// NewStage creates a new Stage by first creating a new sdl.Window and
+// sdl.Renderer from the provided StageOpts.
 func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error) {
 	window, err := sdl.CreateWindow(title, opts.PosX, opts.PosY, width, height, opts.WindowFlags)
 	if err != nil {
@@ -104,11 +106,36 @@ func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error)
 	// stage.renderer.SetLogicalSize(width, height)
 
 	if opts.Icon != nil {
-		window.SetIcon(opts.Icon)
-		opts.Icon.Free()
+		err = stage.setIcon(opts.Icon)
 	}
 
 	return stage, err
+}
+
+// MustNewStage creates a new Stage using NewStage and returns it on success.
+// Any returned errors from NewStage are passed to FailOnErr and result in a
+// fatal exit of the program.
+func MustNewStage(title string, width, height int32, opts StageOpts) *Stage {
+	stage, err := NewStage(title, width, height, opts)
+	if err != nil {
+		FailOnErr(err)
+	}
+	return stage
+}
+
+func (s *Stage) setIcon(icon []byte) error {
+	src, err := sdl.RWFromMem(icon)
+	if err != nil {
+		return err
+	}
+
+	surface, err := sdlimg.LoadRW(src, true)
+	if err != nil {
+		return err
+	}
+
+	s.window.SetIcon(surface)
+	return nil
 }
 
 func (s *Stage) Context() context.Context { return s.ctx }
