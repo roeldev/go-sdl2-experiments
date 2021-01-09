@@ -1,3 +1,7 @@
+// Copyright (c) 2021, Roel Schut. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package sdlkit
 
 import (
@@ -12,18 +16,29 @@ type TextureAtlas struct {
 	uniform bool
 }
 
-func NewTextureAtlas(tx *sdl.Texture, uniform bool) *TextureAtlas {
-	return &TextureAtlas{
+func NewTextureAtlas(tx *sdl.Texture, srcs map[string]sdl.Rect) *TextureAtlas {
+	ta := &TextureAtlas{
 		tx:      tx,
-		sources: make([]sdl.Rect, 0, 32),
-		names:   make(map[string]int, 32),
-		uniform: uniform,
+		sources: make([]sdl.Rect, 0, len(srcs)),
+		names:   make(map[string]int, len(srcs)),
 	}
+
+	for n, s := range srcs {
+		if i, exists := ta.names[n]; exists {
+			ta.sources[i] = s
+			continue
+		}
+
+		ta.names[n] = len(ta.sources)
+		ta.sources = append(ta.sources, s)
+	}
+
+	return ta
 }
 
-func NewTextureAtlasU(tx *sdl.Texture, cellW, cellH int32, total uint8) (*TextureAtlas, error) {
+func NewUniformTextureAtlas(tx *sdl.Texture, cellW, cellH int32, total uint8) (*TextureAtlas, error) {
 	if total < 1 {
-		return nil, errors.Newf("sdlkit: a SpriteSheet needs at least 1 cell")
+		return nil, errors.Newf("sdlkit: a TextureAtlas needs at least 1 cell")
 	}
 
 	_, _, txW, txH, err := tx.Query()
@@ -56,19 +71,6 @@ Loop:
 
 func (ta *TextureAtlas) Texture() *sdl.Texture { return ta.tx }
 
-func (ta *TextureAtlas) Add(name string, src sdl.Rect) {
-	if name != "" {
-		if i, exists := ta.names[name]; exists {
-			ta.sources[i] = src
-			return
-		}
-
-		ta.names[name] = len(ta.sources)
-	}
-
-	ta.sources = append(ta.sources, src)
-}
-
 func (ta *TextureAtlas) Index(i int) (sdl.Rect, bool) {
 	if len(ta.sources) <= i {
 		return sdl.Rect{}, false
@@ -83,4 +85,12 @@ func (ta *TextureAtlas) Name(name string) (sdl.Rect, bool) {
 	}
 
 	return sdl.Rect{}, false
+}
+
+func (ta *TextureAtlas) Names() []string {
+	res := make([]string, 0, len(ta.names))
+	for n := range ta.names {
+		res = append(res, n)
+	}
+	return res
 }
