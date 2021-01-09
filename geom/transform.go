@@ -1,3 +1,7 @@
+// Copyright (c) 2020, Roel Schut. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package geom
 
 import (
@@ -7,6 +11,12 @@ import (
 type Transform struct {
 	Rotation       Degrees
 	ScaleX, ScaleY float32
+}
+
+func ResetTransform(t *Transform) {
+	t.Rotation = 0
+	t.ScaleX = 1
+	t.ScaleY = 1
 }
 
 type Bounds struct {
