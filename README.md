@@ -42,8 +42,7 @@ import "github.com/go-pogo/sdlkit"
   running `gcc -v`
 - run `go get -v github.com/veandco/go-sdl2/sdl@master`
 - run `go mod vendor` to create/sync vendor directory
--
-run `git submodule add https://github.com/veandco/go-sdl2-libs.git .go-sdl2-libs`
+- run `git submodule add https://github.com/veandco/go-sdl2-libs.git .go-sdl2-libs`
 - copy/symlink `.go-sdl2-libs`
   to `vendor/github.com/veandco/go-sdl12/.go-sdl2-libs`
 - build/run your project with the `-tags static` build flag
