@@ -5,19 +5,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/roeldev/go-x11colors"
 	"github.com/veandco/go-sdl2/sdl"
 
 	"github.com/go-pogo/sdlkit"
 )
-
-func printErr(err error) {
-	_, _ = fmt.Fprint(os.Stderr, err)
-	os.Exit(1)
-}
 
 func main() {
 	sdlkit.FailOnErr(sdl.Init(sdl.INIT_VIDEO))
@@ -25,12 +17,8 @@ func main() {
 
 	sdlkit.DefaultStageOpts.BgColor = x11colors.LightGrey
 
-	stage, err := sdlkit.NewStage("example 2", 400, 300, sdlkit.DefaultStageOpts)
-	if err != nil {
-		sdlkit.FailOnErr(err)
-	}
+	stage := sdlkit.MustNewStage("example 2", 400, 300, sdlkit.DefaultStageOpts)
+	defer stage.Destroy()
 
-	world := newWorld(stage)
-	defer world.Destroy()
-	sdlkit.FailOnErr(world.Run())
+	sdlkit.FailOnErr(newWorld(stage).Run())
 }

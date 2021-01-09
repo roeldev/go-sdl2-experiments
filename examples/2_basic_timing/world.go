@@ -49,7 +49,7 @@ func (w *world) setup() {
 		w.draw = append(w.draw, box)
 	}
 
-	w.draw = append(w.draw, w.stage.Time().Display(10, 10))
+	w.draw = append(w.draw, w.stage.Time().CreateDisplay(10, 10))
 }
 
 func (w *world) Pause(pause bool) {
@@ -62,16 +62,17 @@ func (w *world) Pause(pause bool) {
 	}
 }
 
+// Run starts and runs the custom game loop for this example world.
 func (w *world) Run() error {
 	w.setup()
 
-	// automatically pause the world after X seconds
-	clock := w.stage.Time().Init()
+	renderer := w.stage.Renderer()
+	timer := w.stage.Time().Init()
 	var timeCount float32
 
 Loop:
 	for {
-		dt := clock.Tick()
+		dt := timer.Tick()
 
 		// process input/events
 		for {
@@ -100,11 +101,14 @@ Loop:
 				case sdl.SCANCODE_RETURN2:
 					fallthrough
 				case sdl.SCANCODE_KP_ENTER:
-					clock.LimitFps = !clock.LimitFps
+					timer.LimitFps = !timer.LimitFps
 
 				case sdl.SCANCODE_ESCAPE:
-					w.stage.RenderTarget().Clear()
-					w.stage.Renderer().Present()
+					if err := w.stage.ClearScreen(); err != nil {
+						return err
+					}
+
+					w.stage.PresentScreen()
 					w.setup()
 					timeCount = 0
 					goto Loop
@@ -127,14 +131,16 @@ Loop:
 		// time.Sleep(time.Millisecond * time.Duration(5+rand.Intn(15)))
 
 		// render to window
-		rt := w.stage.RenderTarget()
-		rt.ClearAndDraw(w.draw...)
-
-		if err := rt.Err(); err != nil {
-			printErr(err)
+		if err := w.stage.ClearScreen(); err != nil {
+			return err
 		}
+		if err := sdlkit.Draw(renderer, w.draw...); err != nil {
+			return err
+		}
+
 		w.stage.Renderer().Present()
 
+		// automatically pause the world after X seconds
 		if w.pauseAfter > 0 {
 			timeCount += float32(time.Second) * dt
 			if time.Duration(timeCount) >= w.pauseAfter {
@@ -143,8 +149,4 @@ Loop:
 			}
 		}
 	}
-}
-
-func (w *world) Destroy() {
-	w.stage.Destroy()
 }

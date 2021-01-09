@@ -4,8 +4,8 @@
 
 package main
 
-import "C"
 import (
+	_ "embed"
 	"os"
 	"path"
 	"runtime"
@@ -17,6 +17,9 @@ import (
 
 	"github.com/go-pogo/sdlkit"
 )
+
+//go:embed "img.ico"
+var icon []byte
 
 func resolveRootDir(skipCallers int) (string, error) {
 	_, dir, _, ok := runtime.Caller(skipCallers)
@@ -40,7 +43,7 @@ func main() {
 	}
 
 	sdlkit.DefaultStageOpts.BgColor = x11colors.White
-	sdlkit.DefaultStageOpts.Icon, _ = sdlimg.Load(dir + "/img.ico")
+	sdlkit.DefaultStageOpts.Icon = icon
 
 	stage, err := sdlkit.NewStage("example 1", 400, 300, sdlkit.DefaultStageOpts)
 	if err != nil {
@@ -55,15 +58,14 @@ func main() {
 	}
 
 	// render to window
-	rt := stage.RenderTarget()
-	rt.ClearAndDraw(
+	sdlkit.FailOnErr(stage.ClearScreen())
+	sdlkit.FailOnErr(sdlkit.Draw(stage.Renderer(),
 		drawSquare(100, 10, 190, x11colors.RandRed(sdlkit.RNG())),
 		drawCircle(30, 130, 80, x11colors.RandBlue(sdlkit.RNG())),
 		drawImg(tx, 5, 100, 50, sdl.FLIP_NONE),
 		drawImg(tx, 1, 10, 10, sdl.FLIP_HORIZONTAL|sdl.FLIP_VERTICAL),
-	)
+	))
 
-	sdlkit.FailOnErr(rt.Err())
 	stage.PresentScreen()
 
 	for {
