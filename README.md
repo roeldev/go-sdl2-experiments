@@ -21,10 +21,12 @@ SDL2 toolkit for Go
 
 [doc-url]: https://pkg.go.dev/github.com/go-pogo/sdlkit
 
+[examples-url]: https://github.com/go-pogo/sdlkit-examples
+
 
 Package `sdlkit` contains basic building blocks when using `SDL2` with go. It
-uses `github.com/veandco/go-sdl2` at its base and builds upon it. This package
-is not a game or physics engine.
+uses `github.com/veandco/go-sdl2` at its base and builds upon it. This package is not a game or
+physics engine.
 
 ```sh
 go get github.com/go-pogo/sdlkit
@@ -37,9 +39,9 @@ import "github.com/go-pogo/sdlkit"
 ## SDL2 installation on Windows
 
 - install a gcc compiler (for example `tdm-gcc`
-  from https://jmeubank.github.io/tdm-gcc/download/)
-- make sure it is added to your PATH environment variable, test this by
-  running `gcc -v`
+  from [https://jmeubank.github.io/tdm-gcc/download/](https://jmeubank.github.io/tdm-gcc/download/))
+- make sure all gcc related executables are available through your PATH environment variable, test
+  this by running `gcc -v`
 - run `go get -v github.com/veandco/go-sdl2/sdl@master`
 - run `go mod vendor` to create/sync vendor directory
 - run `git submodule add https://github.com/veandco/go-sdl2-libs.git .go-sdl2-libs`
@@ -51,11 +53,13 @@ import "github.com/go-pogo/sdlkit"
 ## Documentation
 Additional detailed documentation is available at [pkg.go.dev][doc-url]
 
+## Examples
+Several examples can be found at [https://github.com/go-pogo/sdlkit-examples][examples-url].
+
 ## Created with
 <a href="https://www.jetbrains.com/?from=roeldev" target="_blank"><img src="https://pbs.twimg.com/profile_images/1206615658638856192/eiS7UWLo_400x400.jpg" width="35" /></a>
 
 ## License
-Copyright © 2020 [Roel Schut](https://roelschut.nl). All rights reserved.
+Copyright © 2020-2021 [Roel Schut](https://roelschut.nl). All rights reserved.
 
-This project is governed by a BSD-style license that can be found in
-the [LICENSE](LICENSE) file.
+This project is governed by a BSD-style license that can be found in the [LICENSE](LICENSE) file.
