@@ -9,8 +9,7 @@ import (
 )
 
 type Transform struct {
-	Rotation       Degrees
-	ScaleX, ScaleY float32
+	Rotation, ScaleX, ScaleY float64
 }
 
 func ResetTransform(t *Transform) {
@@ -21,39 +20,38 @@ func ResetTransform(t *Transform) {
 
 type Bounds struct {
 	sdl.Rect
-	origW, origH int32
+	i32Orig [2]int32
+	f64Orig [2]float64
 }
 
 func RectBounds(w, h int32) Bounds {
 	return Bounds{
-		Rect:  sdl.Rect{W: w, H: h},
-		origW: w,
-		origH: h,
+		Rect:    sdl.Rect{W: w, H: h},
+		i32Orig: [2]int32{w, h},
+		f64Orig: [2]float64{float64(w), float64(h)},
 	}
 }
 
 func (b *Bounds) Update(pos Point) {
-	b.X = int32(pos.X - (float32(b.origW) / 2))
-	b.Y = int32(pos.Y - (float32(b.origH) / 2))
-	b.W = b.origW
-	b.H = b.origH
+	b.X = int32(pos.X - (b.f64Orig[0] / 2))
+	b.Y = int32(pos.Y - (b.f64Orig[1] / 2))
+	b.W = b.i32Orig[0]
+	b.H = b.i32Orig[1]
 }
 
-func (b *Bounds) Transform(pos Point, tr Transform) {
-	var w, h float32
+func (b *Bounds) UpdateAndTransform(pos Point, tr Transform) {
+	w, h := b.f64Orig[0], b.f64Orig[1]
 	if tr.ScaleX != 0 && tr.ScaleX != 1 {
-		w = float32(b.origW) * tr.ScaleX
+		w *= tr.ScaleX
 		b.W = int32(w)
 	} else {
-		w = float32(b.origW)
-		b.W = b.origW
+		b.W = b.i32Orig[0]
 	}
 	if tr.ScaleY != 0 && tr.ScaleY != 1 {
-		h = float32(b.origH) * tr.ScaleY
+		h *= tr.ScaleY
 		b.H = int32(h)
 	} else {
-		h = float32(b.origH)
-		b.H = b.origH
+		b.H = b.i32Orig[1]
 	}
 
 	b.X = int32(pos.X - (w / 2))

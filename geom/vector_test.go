@@ -32,7 +32,7 @@ func TestVector_SetLength(t *testing.T) {
 
 func TestVector_Normalize(t *testing.T) {
 	original := &Vector{10, 10}
-	normalized := original.Normalize()
+	normalized := original.Norm()
 
 	assert.Equal(t, 1, int(normalized.Length()))
 	assert.Equal(t, &Vector{10, 10}, original, "original Vector should not have changed")

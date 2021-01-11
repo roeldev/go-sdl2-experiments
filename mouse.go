@@ -24,7 +24,7 @@ const (
 type TrackMouseBtnState uint8
 
 type MouseState struct {
-	Pos       geom.Point
+	geom.Point
 	BtnLeft   *MouseBtnState
 	BtnRight  *MouseBtnState
 	BtnMiddle *MouseBtnState
@@ -79,13 +79,13 @@ func (ms *MouseState) HandleMouseButtonEvent(e *sdl.MouseButtonEvent) error {
 }
 
 func (ms *MouseState) HandleMouseMotionEvent(e *sdl.MouseMotionEvent) error {
-	ms.Pos.X = float32(e.X)
-	ms.Pos.Y = float32(e.Y)
+	ms.X = float64(e.X)
+	ms.Y = float64(e.Y)
 	return nil
 }
 
 type MouseBtnState struct {
-	Pos      geom.Point
+	geom.Point
 	Pressed  bool
 	Released bool
 	Clicks   uint8
@@ -100,8 +100,8 @@ type MouseBtnState struct {
 }
 
 func (btn *MouseBtnState) updateMouseBtnState(e *sdl.MouseButtonEvent) {
-	btn.Pos.X = float32(e.X)
-	btn.Pos.Y = float32(e.Y)
+	btn.X = float64(e.X)
+	btn.Y = float64(e.Y)
 	btn.Pressed = e.State == sdl.PRESSED
 	btn.Released = !btn.Pressed
 	btn.Clicks = e.Clicks

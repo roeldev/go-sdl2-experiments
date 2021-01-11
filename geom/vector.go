@@ -9,85 +9,86 @@ import (
 	"math"
 )
 
-const (
-	r2dPi = 180 / math.Pi
-	d2rPi = math.Pi / 180
-)
-
-var (
-	vectorUp    = Vector{0, -1}
-	vectorDown  = Vector{0, 1}
-	vectorLeft  = Vector{-1, 0}
-	vectorRight = Vector{1, 0}
-)
-
-type Radians float64
-
-func (r Radians) Degrees() float64 {
-	return float64(r) * r2dPi
-}
-
-type Degrees float64
-
-func (d Degrees) Radians() float64 {
-	return float64(d) * d2rPi
-}
+// var (
+// 	vectorUp    = Vector{0, -1}
+// 	vectorDown  = Vector{0, 1}
+// 	vectorLeft  = Vector{-1, 0}
+// 	vectorRight = Vector{1, 0}
+// )
 
 type Vector struct {
-	X float32
-	Y float32
+	X, Y float64
 }
 
-// Angle returns the angle in radians.
-func (v *Vector) Angle() Radians {
-	return Radians(math.Atan2(float64(v.Y), float64(v.X)))
-}
+// Point returns a Point with the same X and Y values as the Vector.
+func (v Vector) Point() Point { return Point{X: v.X, Y: v.Y} }
 
-// Length returns the length (magnitude) of the Vector.
-func (v *Vector) Length() float64 {
-	return math.Sqrt(v.LengthSq())
-}
+// Clone returns a pointer to a new Vector with the same X and Y values as the
+// source Vector.
+func (v Vector) Clone() *Vector { return &Vector{X: v.X, Y: v.Y} }
 
-func (v *Vector) LengthSq() float64 {
-	return float64((v.X * v.X) + (v.Y * v.Y))
-}
-
-func (v *Vector) Distance(vec Vector) float64 {
-	return math.Sqrt(v.DistanceSq(vec))
-}
-
-func (v *Vector) DistanceSq(vec Vector) float64 {
-	dx := vec.X - v.X
-	dy := vec.Y - v.Y
-	return float64((dx * dx) + (dy * dy))
-}
-
-// Equals compares the X and Y values of this Vector and the given Vector, and
-// returns true when they are equal.
-func (v *Vector) Equals(vec Vector) bool {
-	return v.X == vec.X && v.Y == vec.Y
-}
-
-// Dot calculates the dot product of this Vector and the given Vector.
-func (v *Vector) Dot(vec Vector) float32 {
-	return (v.X * vec.X) + (v.Y * vec.Y)
-}
-
-// Cross calculates the cross product of this Vector and the given Vector.
-func (v *Vector) Cross(vec Vector) float32 {
-	return (v.X * vec.Y) + (v.Y * vec.X)
-}
-
-// set the X and Y values according to the provided angle in radians and length.
-func (v *Vector) set(angle Radians, length float64) *Vector {
-	v.X = float32(math.Cos(float64(angle)) * length)
-	v.Y = float32(math.Sin(float64(angle)) * length)
+// set the X and Y values according to the provided angle (in radians) and
+// length.
+func (v *Vector) set(angle, length float64) *Vector {
+	v.X = math.Cos(angle) * length
+	v.Y = math.Sin(angle) * length
 	return v
 }
 
-func (v *Vector) SetAngle(angle Radians) *Vector { return v.set(angle, v.Length()) }
+// SetAngle in radians.
+func (v *Vector) SetAngle(angle float64) *Vector { return v.set(angle, v.Length()) }
 
 func (v *Vector) SetLength(l float64) *Vector { return v.set(v.Angle(), l) }
+
+// Zero sets this Vector to 0 values.
+func (v *Vector) Zero() *Vector {
+	v.X, v.Y = 0, 0
+	return v
+}
+
+// Add the given Vector to this Vector.
+func (v *Vector) Add(add Vector) *Vector {
+	v.X += add.X
+	v.Y += add.Y
+	return v
+}
+
+// Sub subtracts the given Vector from this Vector.
+func (v *Vector) Sub(sub Vector) *Vector {
+	v.X -= sub.X
+	v.Y -= sub.Y
+	return v
+}
+
+// Mul multiplies this Vector by the given Vector.
+func (v *Vector) Mul(mul Vector) *Vector {
+	v.X *= mul.X
+	v.Y *= mul.Y
+	return v
+}
+
+// Div divides this Vector by the given Vector.
+func (v *Vector) Div(div Vector) *Vector {
+	v.X /= div.X
+	v.Y /= div.Y
+	return v
+}
+
+// Negate the X and Y values of this Vector, meaning negative numbers becoming
+// positive and positive becoming negative.
+func (v *Vector) Negate() *Vector {
+	v.X = -v.X
+	v.Y = -v.Y
+	return v
+}
+
+// Scale this Vector by the given scale value, where 1 is equal to the Vector's
+// current value.
+func (v *Vector) Scale(scale float64) *Vector {
+	v.X *= scale
+	v.Y *= scale
+	return v
+}
 
 // Limit the length of this Vector.
 func (v *Vector) Limit(length float64) *Vector {
@@ -98,36 +99,78 @@ func (v *Vector) Limit(length float64) *Vector {
 	return v.SetLength(length)
 }
 
-// Rotate this Vector by an angle amount.
-func (v *Vector) Rotate(angle Radians) *Vector {
-	cos := math.Cos(float64(angle))
-	sin := math.Sin(float64(angle))
-
-	x := float64(v.X)
-	y := float64(v.Y)
-
-	v.X = float32((cos * x) - (sin * y))
-	v.Y = float32((sin * x) - (cos * y))
+// Rotate this Vector by an angle amount (in radians).
+func (v *Vector) Rotate(angle float64) *Vector {
+	cos := math.Cos(angle)
+	sin := math.Sin(angle)
+	v.X = (cos * v.X) - (sin * v.Y)
+	v.Y = (sin * v.X) - (cos * v.Y)
 	return v
 }
 
-// Lerp linearly interpolates this Vector towards the given Vector. Value t is
+// Lerp linearly interpolates this Vector towards the target Vector. Value t is
 // the interpolation percentage between 0 and 1.
-func (v *Vector) Lerp(vec Vector, t float32) *Vector {
-	v.X += (vec.X - v.X) * t
-	v.Y += (vec.Y - v.Y) * t
+func (v *Vector) Lerp(target Vector, t float64) *Vector {
+	v.X += (target.X - v.X) * t
+	v.Y += (target.Y - v.Y) * t
 	return v
 }
 
-// Scale the Vector by the given scale value, where 1 is equal to the Vector's
-// current value.
-func (v *Vector) Scale(scale float32) *Vector {
-	v.X *= scale
-	v.Y *= scale
+// Angle returns the angle in radians.
+func (v Vector) Angle() float64 { return math.Atan2(v.Y, v.X) }
+
+// Length returns the length (magnitude).
+func (v Vector) Length() float64 { return math.Sqrt(v.LengthSq()) }
+
+// Length returns the squared length (magnitude).
+func (v Vector) LengthSq() float64 {
+	return (v.X * v.X) + (v.Y * v.Y)
+}
+
+// Dist calculates the distance between the Vector and the target Vector.
+// It uses math.Sqrt so it is heavy to compute.
+func (v Vector) Dist(target Vector) float64 {
+	return math.Sqrt(v.DistSq(target))
+}
+
+// DistSq calculates the squared distance between the Vector and the target
+// Vector.
+func (v Vector) DistSq(target Vector) float64 {
+	dx, dy := target.X-v.X, target.Y-v.Y
+	return (dx * dx) + (dy * dy)
+}
+
+// Equals compares the X and Y values of the Vector and the target Vector, and
+// returns true when they are equal.
+func (v Vector) Equals(target Vector) bool {
+	return v.X == target.X && v.Y == target.Y
+}
+
+// Norm normalizes the Vector by making the length a magnitude of 1 in the same
+// direction. It does not alter the source Vector.
+func (v Vector) Norm() Vector {
+	l := v.LengthSq()
+	if l != 1 {
+		v.Scale(1 / math.Sqrt(l))
+	}
 	return v
 }
 
-func (v *Vector) String() string {
+// Dot calculates the dot product of the Vector and the target Vector.
+func (v Vector) Dot(target Vector) float64 {
+	return (v.X * target.X) + (v.Y * target.Y)
+}
+
+// Cross calculates the cross product of the Vector and the target Vector.
+func (v Vector) Cross(target Vector) float64 {
+	return (v.X * target.Y) + (v.Y * target.X)
+}
+
+func (v Vector) String() string {
 	angle := v.Angle()
-	return fmt.Sprintf("%T{%f, %f}, angle: %f (= %f°), length: %f", v, v.X, v.Y, angle, angle*r2dPi, v.Length())
+	return fmt.Sprintf("%T{%f, %f}, angle: %f (= %f°), length: %f",
+		v, v.X, v.Y,
+		angle, RadToDeg(angle),
+		v.Length(),
+	)
 }

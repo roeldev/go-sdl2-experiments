@@ -5,12 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 func TestInCircle(t *testing.T) {
 	tests := []struct {
-		x, y, cx, cy, rad float32
+		x, y, cx, cy, rad float64
 		ok                bool
 	}{
 		{1, 1, 1, 1, 2, true},
@@ -27,7 +26,7 @@ func TestInCircle(t *testing.T) {
 
 func TestInRect(t *testing.T) {
 	tests := []struct {
-		x, y, rx, ry, rw, rh float32
+		x, y, rx, ry, rw, rh float64
 		ok                   bool
 	}{
 		{1, 2, 0, 0, 22, 100, true},
@@ -37,8 +36,8 @@ func TestInRect(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%.2fx%.2f", tc.x, tc.y), func(t *testing.T) {
 			assert.Equal(t, tc.ok, InRect(tc.x, tc.y, tc.rx, tc.ry, tc.rw, tc.rh))
-			r := sdl.FRect{X: tc.rx, Y: tc.ry, W: tc.rw, H: tc.rh}
-			assert.Equal(t, tc.ok, Point{X: tc.x, Y: tc.y}.InFRect(r))
+			// r := sdl.FRect{X: tc.rx, Y: tc.ry, W: tc.rw, H: tc.rh}
+			// assert.Equal(t, tc.ok, Point{X: tc.x, Y: tc.y}.InFRect(r))
 		})
 	}
 }

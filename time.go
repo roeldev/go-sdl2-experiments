@@ -17,24 +17,26 @@ import (
 
 const (
 	DefaultFps       uint8   = 60
-	DefaultTimeScale float32 = 1.0
+	DefaultTimeScale float64 = 1.0
 )
 
-var fsec = float32(time.Second)
+var fsec = float64(time.Second)
 
 type Clock struct {
 	time *Time
 
-	// DeltaTS returns the current delta time value adjusted with the current time
+	Delta32 float32
+
+	// Delta64 returns the current delta time value adjusted with the current time
 	// scale. This means if the time scale is set to half speed, the delta value is
 	// also half it's original value.
-	Delta float32
+	Delta64 float64
 
 	// affects the speed of time
 	// 1.0 means normal speed
 	// 0.5 means twice as slow
 	// 2.0 means twice as fast
-	TimeScale float32
+	TimeScale float64
 }
 
 func NewClock() *Clock {
@@ -60,7 +62,7 @@ type Time struct {
 	// delta decreases at higher fps
 	// delta increases at lower fps
 	// delta = 1 when fps = 1, meaning move 1 px per second
-	delta float32
+	delta float64
 
 	// elapsed time since last tick
 	elapsed time.Duration
@@ -106,9 +108,6 @@ func (t *Time) Fps() float32 { return t.avgPerSec.current }
 // AvgFps returns the average FPS of the last 30 seconds.
 func (t *Time) AvgFps() float32 { return t.avgPerMin.current }
 
-// Delta returns the current delta time value.
-func (t *Time) Delta() float32 { return t.delta }
-
 func (t *Time) Elapsed() time.Duration { return t.elapsed }
 
 func (t *Time) Init() *Time {
@@ -116,7 +115,7 @@ func (t *Time) Init() *Time {
 	return t
 }
 
-func (t *Time) Tick() float32 {
+func (t *Time) Tick() float64 {
 	now := time.Now()
 
 	if t.LimitFps {
@@ -129,10 +128,11 @@ func (t *Time) Tick() float32 {
 
 	t.elapsed = now.Sub(t.prevTick)
 	t.prevTick = now
-	t.delta = float32(t.elapsed) / fsec
+	t.delta = float64(t.elapsed) / fsec
 
 	for _, clock := range t.clocks {
-		clock.Delta = t.delta * clock.TimeScale
+		clock.Delta64 = t.delta * clock.TimeScale
+		clock.Delta32 = float32(clock.Delta64)
 	}
 
 	t.avgPerSec.update(t.elapsed)
@@ -141,7 +141,7 @@ func (t *Time) Tick() float32 {
 	return t.delta
 }
 
-func (t *Time) CreateDisplay(x, y float32) *FpsDisplay {
+func (t *Time) CreateDisplay(x, y float64) *FpsDisplay {
 	display := &FpsDisplay{
 		time:        t,
 		Scale:       2,
@@ -176,8 +176,8 @@ func (d *FpsDisplay) Draw(r *sdl.Renderer) (err error) {
 	if d.Scale > 1 {
 		sx, sy = r.GetScale()
 		errors.Append(&err, r.SetScale(d.Scale, d.Scale))
-		x = int32(d.Point.X / d.Scale)
-		y = int32(d.Point.Y / d.Scale)
+		x = int32(d.Point.X / float64(d.Scale))
+		y = int32(d.Point.Y / float64(d.Scale))
 	} else {
 		x = int32(d.Point.X)
 		y = int32(d.Point.Y)

@@ -10,15 +10,6 @@ func (vp Viewport) Rect() sdl.Rect {
 	return sdl.Rect{X: vp.X, Y: vp.Y, W: vp.W, H: vp.H}
 }
 
-// func (vp Viewport) FRect() sdl.FRect {
-// 	return sdl.FRect{
-// 		X: float32(vp.X),
-// 		Y: float32(vp.Y),
-// 		W: float32(vp.W),
-// 		H: float32(vp.H),
-// 	}
-// }
-
 func (vp Viewport) Border(margin int32) (t, b, l, r int32) {
 	return vp.Y + margin,
 		vp.H - margin,
@@ -26,9 +17,9 @@ func (vp Viewport) Border(margin int32) (t, b, l, r int32) {
 		vp.W - margin
 }
 
-func (vp Viewport) FBorder(margin float32) (t, b, l, r float32) {
-	return float32(vp.Y) + margin,
-		float32(vp.H) - margin,
-		float32(vp.X) + margin,
-		float32(vp.W) - margin
+func (vp Viewport) FBorder(margin float64) (t, b, l, r float64) {
+	return float64(vp.Y) + margin,
+		float64(vp.H) - margin,
+		float64(vp.X) + margin,
+		float64(vp.W) - margin
 }

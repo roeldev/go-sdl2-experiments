@@ -26,7 +26,7 @@ const (
 	PosBottomRight
 )
 
-func Align(pos Position, pt *Point, x, y, w, h float32) {
+func Align(pos Position, pt *Point, x, y, w, h float64) {
 	// x pos
 	switch pos {
 	case PosCenter:
@@ -85,9 +85,9 @@ func Align(pos Position, pt *Point, x, y, w, h float32) {
 }
 
 func AlignRect(pos Position, pt *Point, r sdl.Rect) {
-	Align(pos, pt, float32(r.X), float32(r.Y), float32(r.W), float32(r.H))
+	Align(pos, pt, float64(r.X), float64(r.Y), float64(r.W), float64(r.H))
 }
 
 func AlignFRect(pos Position, pt *Point, r sdl.FRect) {
-	Align(pos, pt, r.X, r.Y, r.W, r.H)
+	Align(pos, pt, float64(r.X), float64(r.Y), float64(r.W), float64(r.H))
 }
