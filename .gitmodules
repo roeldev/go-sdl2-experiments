@@ -1,0 +1,6 @@
+[submodule ".go-sdl2-libs"]
+	path = .go-sdl2-libs
+	url = https://github.com/veandco/go-sdl2-libs.git
+[submodule ".sdlkit-examples"]
+	path = .sdlkit-examples
+	url = git@github.com:go-pogo/sdlkit-examples.git
