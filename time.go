@@ -25,18 +25,15 @@ var fsec = float64(time.Second)
 type Clock struct {
 	time *Time
 
-	Delta32 float32
+	// TimeScale affects the speed of time. Its default value is 1.0.
+	// When TimeScale < 1, time slows down. Time speeds up when TimeScale > 1.
+	TimeScale float64
 
-	// Delta64 returns the current delta time value adjusted with the current time
-	// scale. This means if the time scale is set to half speed, the delta value is
-	// also half it's original value.
+	// Delta64 returns the current delta time value multiplied by TimeScale.
 	Delta64 float64
 
-	// affects the speed of time
-	// 1.0 means normal speed
-	// 0.5 means twice as slow
-	// 2.0 means twice as fast
-	TimeScale float64
+	// Delta32 is a float32 version of Delta64.
+	Delta32 float32
 }
 
 func NewClock() *Clock {

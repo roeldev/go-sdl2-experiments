@@ -12,7 +12,7 @@ import (
 type Scene interface {
 	// scene bepaalt zelf hoe die events afhandelt
 	Process() error
-	Update()
+	Update(dt float64)
 	Render(r *sdl.Renderer) error
 }
 

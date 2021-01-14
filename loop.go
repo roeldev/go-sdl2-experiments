@@ -12,7 +12,7 @@ func RunLoop(stage *Stage) error {
 	timer := stage.Time().Init()
 
 	for {
-		timer.Tick()
+		dt := timer.Tick()
 
 		// handle events
 		if err := scene.Process(); err != nil {
@@ -27,7 +27,7 @@ func RunLoop(stage *Stage) error {
 		}
 
 		// update state of scene
-		scene.Update()
+		scene.Update(dt)
 
 		// render to screen
 		if err := stage.ClearScreen(); err != nil {
