@@ -54,7 +54,9 @@ type Time struct {
 	targetFrameRate     uint8         // 60 fps
 	targetFrameDuration time.Duration // max ticks per frame to reach targetFrameRate
 
-	prevTick time.Time
+	startTick uint32
+	startTime time.Time
+	prevTime  time.Time
 
 	// delta decreases at higher fps
 	// delta increases at lower fps
@@ -77,9 +79,11 @@ func NewTime(targetFps uint8, clock ...*Clock) *Time {
 		avgPerSec: avgFps{after: time.Second / 2, current: float32(targetFps)},
 		avgPerMin: avgFps{after: time.Second * 30},
 		clocks:    clock,
-		prevTick:  time.Now(),
+		startTick: sdl.GetTicks(),
+		startTime: time.Now(),
 	}
 
+	t.prevTime = t.startTime
 	t.SetTargetFps(targetFps)
 	return t
 }
@@ -99,6 +103,12 @@ func (t *Time) RegisterClock(clock *Clock) {
 	t.clocks = append(t.clocks, clock)
 }
 
+// ConvTicks coverts a ticks value from sdl.GetTicks to a time.Time value.
+// The result may be a few microseconds off but is well below a millisecond.
+func (t *Time) ConvTicks(ticks uint32) time.Time {
+	return t.startTime.Add(time.Duration(ticks-t.startTick) * time.Millisecond)
+}
+
 // Fps returns the average FPS of the last 500 milliseconds.
 func (t *Time) Fps() float32 { return t.avgPerSec.current }
 
@@ -108,7 +118,7 @@ func (t *Time) AvgFps() float32 { return t.avgPerMin.current }
 func (t *Time) Elapsed() time.Duration { return t.elapsed }
 
 func (t *Time) Init() *Time {
-	t.prevTick = time.Now()
+	t.prevTime = time.Now()
 	return t
 }
 
@@ -116,15 +126,15 @@ func (t *Time) Tick() float64 {
 	now := time.Now()
 
 	if t.LimitFps {
-		elapsed := now.Sub(t.prevTick)
+		elapsed := now.Sub(t.prevTime)
 		if elapsed < t.targetFrameDuration {
 			time.Sleep(t.targetFrameDuration - elapsed - time.Millisecond)
 			now = time.Now()
 		}
 	}
 
-	t.elapsed = now.Sub(t.prevTick)
-	t.prevTick = now
+	t.elapsed = now.Sub(t.prevTime)
+	t.prevTime = now
 	t.delta = float64(t.elapsed) / fsec
 
 	for _, clock := range t.clocks {
