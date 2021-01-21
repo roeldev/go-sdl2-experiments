@@ -6,7 +6,9 @@ package sdlkit
 
 import (
 	"context"
+	"fmt"
 	"image/color"
+	"strings"
 
 	"github.com/go-pogo/errors"
 	sdlimg "github.com/veandco/go-sdl2/img"
@@ -24,7 +26,8 @@ var DefaultStageOpts = StageOpts{
 	RendererFlags: sdl.RENDERER_ACCELERATED,
 
 	// timer options
-	TargetFps: DefaultFps,
+	TargetFps:      DefaultFps,
+	WindowTitleFps: true,
 }
 
 type StageOpts struct {
@@ -44,8 +47,9 @@ type StageOpts struct {
 	BgColor color.Color // see https://wiki.libsdl.org/SDL_RenderClear
 
 	// timer
-	TargetFps uint8
-	LimitFps  bool
+	TargetFps      uint8
+	LimitFps       bool
+	WindowTitleFps bool
 }
 
 type Stage struct {
@@ -59,7 +63,8 @@ type Stage struct {
 	clock    *Clock
 	scenes   *SceneManager
 
-	BgColor color.RGBA
+	BgColor        color.RGBA
+	WindowTitleFps bool
 }
 
 // NewStage creates a new Stage by first creating a new sdl.Window and
@@ -83,6 +88,8 @@ func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error)
 		time:     NewTime(opts.TargetFps, clock),
 		clock:    clock,
 		scenes:   NewSceneManager(),
+
+		WindowTitleFps: opts.WindowTitleFps,
 	}
 
 	if col, ok := opts.BgColor.(color.RGBA); ok {
@@ -175,11 +182,26 @@ func (s *Stage) ClearScreen() error {
 			0xFF,
 		),
 		s.renderer.Clear(),
+		s.renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND),
 	)
 	return err
 }
 
 func (s *Stage) PresentScreen() { s.renderer.Present() }
+
+const windowTitleFps = " | FPS: "
+
+func (s *Stage) UpdateWindowTitleFps() {
+	title := s.Window().GetTitle()
+	index := strings.LastIndex(title, windowTitleFps)
+	if index > 0 {
+		title = title[:index+len(windowTitleFps)]
+	} else {
+		title += windowTitleFps
+	}
+
+	s.window.SetTitle(fmt.Sprintf("%s%.2f", title, s.time.avgPerSec.current))
+}
 
 func (s *Stage) HandleWindowEvent(e *sdl.WindowEvent) error {
 	switch e.Event {
