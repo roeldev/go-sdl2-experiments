@@ -17,7 +17,8 @@ import (
 // )
 
 type Vector struct {
-	X, Y float64
+	X, Y  float64
+	cache [4]float64 // x, y, magnitude
 }
 
 // Point returns a Point with the same X and Y values as the Vector.
@@ -27,18 +28,18 @@ func (v Vector) Point() Point { return Point{X: v.X, Y: v.Y} }
 // source Vector.
 func (v Vector) Clone() *Vector { return &Vector{X: v.X, Y: v.Y} }
 
-// set the X and Y values according to the provided angle (in radians) and
+// Set the X and Y values according to the provided angle (in radians) and
 // length.
-func (v *Vector) set(angle, length float64) *Vector {
+func (v *Vector) Set(angle, length float64) *Vector {
 	v.X = math.Cos(angle) * length
 	v.Y = math.Sin(angle) * length
 	return v
 }
 
 // SetAngle in radians.
-func (v *Vector) SetAngle(angle float64) *Vector { return v.set(angle, v.Length()) }
+func (v *Vector) SetAngle(angle float64) *Vector { return v.Set(angle, v.Length()) }
 
-func (v *Vector) SetLength(l float64) *Vector { return v.set(v.Angle(), l) }
+func (v *Vector) SetLength(l float64) *Vector { return v.Set(v.Angle(), l) }
 
 // Zero sets this Vector to 0 values.
 func (v *Vector) Zero() *Vector {
@@ -108,7 +109,7 @@ func (v *Vector) Rotate(angle float64) *Vector {
 	return v
 }
 
-// Lerp linearly interpolates this Vector towards the target Vector. Value t is
+// Lerpx linearly interpolates this Vector towards the target Vector. Value t is
 // the interpolation percentage between 0 and 1.
 func (v *Vector) Lerp(target Vector, t float64) *Vector {
 	v.X += (target.X - v.X) * t
@@ -117,10 +118,20 @@ func (v *Vector) Lerp(target Vector, t float64) *Vector {
 }
 
 // Angle returns the angle in radians.
-func (v Vector) Angle() float64 { return math.Atan2(v.Y, v.X) }
+func (v Vector) Angle() float64 {
+	return math.Atan2(v.Y, v.X)
+}
 
 // Length returns the length (magnitude).
-func (v Vector) Length() float64 { return math.Sqrt(v.LengthSq()) }
+func (v Vector) Length() float64 {
+	if v.cache[0] == v.X && v.cache[1] == v.Y {
+		return v.cache[2]
+	}
+
+	l := math.Sqrt(v.LengthSq())
+	v.cache = [4]float64{v.X, v.Y, l, 0}
+	return l
+}
 
 // Length returns the squared length (magnitude).
 func (v Vector) LengthSq() float64 {
@@ -128,7 +139,6 @@ func (v Vector) LengthSq() float64 {
 }
 
 // Dist calculates the distance between the Vector and the target Vector.
-// It uses math.Sqrt so it is heavy to compute.
 func (v Vector) Dist(target Vector) float64 {
 	return math.Sqrt(v.DistSq(target))
 }

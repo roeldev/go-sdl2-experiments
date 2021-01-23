@@ -11,16 +11,16 @@ import (
 )
 
 func TestVector_Angle(t *testing.T) {
-	v := Vector{10, 5}
-	assert.Equal(t, 0.4636476090008061, float64(v.Angle()))
+	v := Vector{X: 10, Y: 5}
+	assert.Equal(t, 0.4636476090008061, v.Angle())
 	assert.Equal(t, 11.180339887498949, v.Length())
 }
 
 func TestVector_Length(t *testing.T) {
-	v := Vector{1, 1}
+	v := Vector{X: 1, Y: 1}
 	assert.Equal(t, 1.4142135623730951, v.Length())
 
-	v2 := Vector{2, 2}
+	v2 := Vector{X: 2, Y: 2}
 	assert.Equal(t, v.Length()*2, v2.Length())
 }
 
@@ -28,12 +28,4 @@ func TestVector_SetLength(t *testing.T) {
 	var v Vector
 	v.SetLength(10)
 	assert.Equal(t, Vector{X: 10}, v)
-}
-
-func TestVector_Normalize(t *testing.T) {
-	original := &Vector{10, 10}
-	normalized := original.Norm()
-
-	assert.Equal(t, 1, int(normalized.Length()))
-	assert.Equal(t, &Vector{10, 10}, original, "original Vector should not have changed")
 }
