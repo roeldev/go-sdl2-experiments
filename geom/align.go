@@ -8,86 +8,86 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type Position uint
+type AlignPosition uint
 
 const (
-	PosCenter Position = iota + 1
-	PosTop
-	PosTopCenter
-	PosBottom
-	PosBottomCenter
-	PosLeft
-	PosLeftMiddle
-	PosRight
-	PosRightMiddle
-	PosTopLeft
-	PosTopRight
-	PosBottomLeft
-	PosBottomRight
+	APCenter AlignPosition = iota + 1
+	APTop
+	APTopCenter
+	APBottom
+	APBottomCenter
+	APLeft
+	APLeftMiddle
+	APRight
+	APRightMiddle
+	APTopLeft
+	APTopRight
+	APBottomLeft
+	APBottomRight
 )
 
-func Align(pos Position, pt *Point, x, y, w, h float64) {
+func Align(pos AlignPosition, pt *Point, x, y, w, h float64) {
 	// x pos
 	switch pos {
-	case PosCenter:
+	case APCenter:
 		fallthrough
-	case PosTopCenter:
+	case APTopCenter:
 		fallthrough
-	case PosBottomCenter:
+	case APBottomCenter:
 		pt.X = x + (w / 2)
 
-	case PosLeft:
+	case APLeft:
 		fallthrough
-	case PosLeftMiddle:
+	case APLeftMiddle:
 		fallthrough
-	case PosTopLeft:
+	case APTopLeft:
 		fallthrough
-	case PosBottomLeft:
+	case APBottomLeft:
 		pt.X = x
 
-	case PosRight:
+	case APRight:
 		fallthrough
-	case PosRightMiddle:
+	case APRightMiddle:
 		fallthrough
-	case PosTopRight:
+	case APTopRight:
 		fallthrough
-	case PosBottomRight:
+	case APBottomRight:
 		pt.X = x + w
 	}
 
 	// y pos
 	switch pos {
-	case PosCenter:
+	case APCenter:
 		fallthrough
-	case PosLeftMiddle:
+	case APLeftMiddle:
 		fallthrough
-	case PosRightMiddle:
+	case APRightMiddle:
 		pt.Y = y + (h / 2)
 
-	case PosTop:
+	case APTop:
 		fallthrough
-	case PosTopLeft:
+	case APTopLeft:
 		fallthrough
-	case PosTopCenter:
+	case APTopCenter:
 		fallthrough
-	case PosTopRight:
+	case APTopRight:
 		pt.Y = y
 
-	case PosBottom:
+	case APBottom:
 		fallthrough
-	case PosBottomLeft:
+	case APBottomLeft:
 		fallthrough
-	case PosBottomCenter:
+	case APBottomCenter:
 		fallthrough
-	case PosBottomRight:
+	case APBottomRight:
 		pt.Y = y + h
 	}
 }
 
-func AlignRect(pos Position, pt *Point, r sdl.Rect) {
+func AlignRect(pos AlignPosition, pt *Point, r sdl.Rect) {
 	Align(pos, pt, float64(r.X), float64(r.Y), float64(r.W), float64(r.H))
 }
 
-func AlignFRect(pos Position, pt *Point, r sdl.FRect) {
+func AlignFRect(pos AlignPosition, pt *Point, r sdl.FRect) {
 	Align(pos, pt, float64(r.X), float64(r.Y), float64(r.W), float64(r.H))
 }

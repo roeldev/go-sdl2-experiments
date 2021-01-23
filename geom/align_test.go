@@ -13,22 +13,22 @@ import (
 
 func TestPos(t *testing.T) {
 	tests := map[string]struct {
-		Pos  Position
+		Pos  AlignPosition
 		Want Point
 	}{
-		"Center":       {PosCenter, Point{X: 25, Y: 40}},
-		"Top":          {PosTop, Point{X: 0, Y: 20}},
-		"TopCenter":    {PosTopCenter, Point{X: 25, Y: 20}},
-		"Bottom":       {PosBottom, Point{X: 0, Y: 60}},
-		"BottomCenter": {PosBottomCenter, Point{X: 25, Y: 60}},
-		"Left":         {PosLeft, Point{X: 10, Y: 0}},
-		"LeftMiddle":   {PosLeftMiddle, Point{X: 10, Y: 40}},
-		"Right":        {PosRight, Point{X: 40, Y: 0}},
-		"RightMiddle":  {PosRightMiddle, Point{X: 40, Y: 40}},
-		"TopLeft":      {PosTopLeft, Point{X: 10, Y: 20}},
-		"TopRight":     {PosTopRight, Point{X: 40, Y: 20}},
-		"BottomLeft":   {PosBottomLeft, Point{X: 10, Y: 60}},
-		"BottomRight":  {PosBottomRight, Point{X: 40, Y: 60}},
+		"Center":       {APCenter, Point{X: 25, Y: 40}},
+		"Top":          {APTop, Point{X: 0, Y: 20}},
+		"TopCenter":    {APTopCenter, Point{X: 25, Y: 20}},
+		"Bottom":       {APBottom, Point{X: 0, Y: 60}},
+		"BottomCenter": {APBottomCenter, Point{X: 25, Y: 60}},
+		"Left":         {APLeft, Point{X: 10, Y: 0}},
+		"LeftMiddle":   {APLeftMiddle, Point{X: 10, Y: 40}},
+		"Right":        {APRight, Point{X: 40, Y: 0}},
+		"RightMiddle":  {APRightMiddle, Point{X: 40, Y: 40}},
+		"TopLeft":      {APTopLeft, Point{X: 10, Y: 20}},
+		"TopRight":     {APTopRight, Point{X: 40, Y: 20}},
+		"BottomLeft":   {APBottomLeft, Point{X: 10, Y: 60}},
+		"BottomRight":  {APBottomRight, Point{X: 40, Y: 60}},
 	}
 
 	area := sdl.FRect{X: 10, Y: 20, W: 30, H: 40}
