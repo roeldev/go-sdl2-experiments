@@ -10,7 +10,6 @@ import (
 )
 
 type Scene interface {
-	// scene bepaalt zelf hoe die events afhandelt
 	Process() error
 	Update(dt float64)
 	Render(r *sdl.Renderer) error
@@ -30,7 +29,7 @@ type SceneDeactivater interface {
 
 type SceneDestroyer interface {
 	Scene
-	Destroy()
+	Destroy() error
 }
 
 type SceneManager struct {
@@ -114,25 +113,29 @@ func (sm *SceneManager) UpdateActiveScene(scenePtr *Scene) bool {
 	return true
 }
 
-func (sm *SceneManager) Remove(name string, destroy bool) bool {
+func (sm *SceneManager) Remove(name string, destroy bool) (bool, error) {
 	scene, exists := sm.list[name]
 	if !exists {
-		return false
+		return false, nil
 	}
+
+	var err error
 	if destroy {
 		if d, ok := scene.(SceneDestroyer); ok {
-			d.Destroy()
+			err = d.Destroy()
 		}
 	}
 
 	sm.list[name] = nil
-	return true
+	return true, err
 }
 
-func (sm *SceneManager) Destroy() {
+func (sm *SceneManager) Destroy() error {
+	var err error
 	for _, scene := range sm.list {
 		if d, ok := scene.(SceneDestroyer); ok {
-			d.Destroy()
+			errors.Append(&err, d.Destroy())
 		}
 	}
+	return err
 }

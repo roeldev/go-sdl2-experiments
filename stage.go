@@ -216,8 +216,9 @@ func (s *Stage) HandleWindowEvent(e *sdl.WindowEvent) error {
 func (s *Stage) Destroy() {
 	s.cfn()
 
+	// todo: send errors to log/stderr
 	if s.scenes != nil {
-		s.scenes.Destroy()
+		_ = s.scenes.Destroy()
 	}
 
 	_ = s.renderer.Destroy()
