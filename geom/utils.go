@@ -8,21 +8,28 @@ import (
 	"math"
 )
 
-const (
-	r2dPi = 180 / math.Pi
-	d2rPi = math.Pi / 180
-)
-
-func RadToDeg(rad float64) float64 { return rad * r2dPi }
-
-func DegToRad(deg float64) float64 { return deg * d2rPi }
-
-func Norm(val, min, max float64) float64 {
-	return (val - min) / (max - min)
+func Norm(v, a, b float64) float64 {
+	if a < b {
+		return (v - a) / (b - a)
+	} else {
+		return (v - b) / (a - b)
+	}
 }
 
-func Lerp(min, max, t float64) float64 {
-	return (max-min)*t + min
+func Lerp(cur, dest, t float64) float64 {
+	return cur + (dest-cur)*t
+}
+
+func Lerpx(cur, dest, t float64) float64 {
+	diff := (dest - cur) * t
+	cur += diff
+	if diff > 0 && cur+0.05 > dest {
+		return dest
+	}
+	if diff < 0 && cur-0.05 < dest {
+		return dest
+	}
+	return cur + diff
 }
 
 func Clamp(val, min, max float64) float64 {
@@ -35,25 +42,21 @@ func Clamp(val, min, max float64) float64 {
 	return val
 }
 
-func Dist(x0, y0, x1, y1 float64) float64 {
-	return math.Sqrt(DistSq(x0, y0, x1, y1))
+// https://www.khanacademy.org/computing/computer-programming/programming-natural-simulations/programming-vectors/a/more-vector-math
+func Distance(x0, y0, x1, y1 float64) float64 {
+	return math.Sqrt(DistanceSq(x0, y0, x1, y1))
 }
 
-func DistSq(x0, y0, x1, y1 float64) float64 {
+func DistanceSq(x0, y0, x1, y1 float64) float64 {
 	dx, dy := x1-x0, y1-y0
 	return (dx * dx) + (dy * dy)
 }
 
-func min(a, b float64) float64 {
-	if a < b {
-		return a
+func Centroid(points ...[2]float64) (x, y float64) {
+	for _, p := range points {
+		x += p[0]
+		y += p[1]
 	}
-	return b
-}
-
-func max(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
+	n := float64(len(points))
+	return x / n, y / n
 }
