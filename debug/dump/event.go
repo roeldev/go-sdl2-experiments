@@ -101,12 +101,12 @@ func Event(event sdl.Event) string {
 
 	case *sdl.ControllerAxisEvent:
 		d.Number("Which", e.Which) // sdl.JoystickID
-		d.Const("Axis", e.Axis, cl.ControllerAxis.Lookup(e.Axis), "unknown controller axis")
+		d.Const("Axis", e.Axis, cl.ControllerAxis.Lookup(int8(e.Axis)), "unknown controller axis")
 		d.Number("Value", e.Value)
 
 	case *sdl.ControllerButtonEvent:
 		d.Number("Which", e.Which) // sdl.JoystickID
-		d.Const("Button", e.Button, cl.ControllerButtons.Lookup(e.Button), "unknown controller button")
+		d.Const("Button", e.Button, cl.ControllerButtons.Lookup(int8(e.Button)), "unknown controller button")
 		d.Const("State", e.State, cl.PressedReleasedState.Lookup(e.State), "unknown press state")
 
 	case *sdl.ControllerDeviceEvent:

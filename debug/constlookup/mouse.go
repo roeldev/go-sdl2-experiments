@@ -4,11 +4,9 @@
 
 package constlookup
 
-import "C"
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
+//goland:noinspection GoUnusedGlobalVariable,SpellCheckingInspection
 var (
 	PressedReleasedState = pressedReleasedState{
 		sdl.RELEASED: "sdl.RELEASED",
@@ -21,7 +19,6 @@ var (
 		sdl.BUTTON_X1:     "sdl.BUTTON_X1",
 		sdl.BUTTON_X2:     "sdl.BUTTON_X2",
 	}
-
 	MouseWheelDirections = mouseWheelDirections{
 		sdl.MOUSEWHEEL_NORMAL:  "sdl.MOUSEWHEEL_NORMAL",
 		sdl.MOUSEWHEEL_FLIPPED: "sdl.MOUSEWHEEL_FLIPPED",

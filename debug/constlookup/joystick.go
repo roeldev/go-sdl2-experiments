@@ -4,9 +4,7 @@
 
 package constlookup
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
 //goland:noinspection GoUnusedGlobalVariable,SpellCheckingInspection
 var (
@@ -54,6 +52,6 @@ type joystickTypes map[uint8]string
 
 func (l joystickTypes) Lookup(c uint8) string { return l[c] }
 
-type joystickPowerLevels map[uint8]string
+type joystickPowerLevels map[int8]string
 
-func (l joystickPowerLevels) Lookup(c uint8) string { return l[c] }
+func (l joystickPowerLevels) Lookup(c int8) string { return l[c] }

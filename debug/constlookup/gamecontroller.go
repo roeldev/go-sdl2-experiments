@@ -4,10 +4,9 @@
 
 package constlookup
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
+//goland:noinspection GoUnusedGlobalVariable,SpellCheckingInspection
 var (
 	ControllerAxis = controllerAxis{
 		sdl.CONTROLLER_AXIS_INVALID:      "sdl.CONTROLLER_AXIS_INVALID",
@@ -41,10 +40,10 @@ var (
 	}
 )
 
-type controllerAxis map[uint8]string
+type controllerAxis map[int8]string
 
-func (l controllerAxis) Lookup(c uint8) string { return l[c] }
+func (l controllerAxis) Lookup(c int8) string { return l[c] }
 
-type controllerButtons map[uint8]string
+type controllerButtons map[int8]string
 
-func (l controllerButtons) Lookup(c uint8) string { return l[c] }
+func (l controllerButtons) Lookup(c int8) string { return l[c] }

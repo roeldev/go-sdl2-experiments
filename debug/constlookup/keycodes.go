@@ -4,9 +4,7 @@
 
 package constlookup
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
 //goland:noinspection GoUnusedGlobalVariable,SpellCheckingInspection
 var (
