@@ -13,9 +13,6 @@ func RunLoop(stage *Stage) error {
 
 	for {
 		dt := timer.Tick()
-		if stage.WindowTitleFps {
-			stage.UpdateWindowTitleFps()
-		}
 
 		// handle events
 		if err := scene.Process(); err != nil {

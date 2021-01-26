@@ -6,48 +6,52 @@ package sdlkit
 
 import (
 	"context"
-	"fmt"
 	"image/color"
-	"strings"
 
 	"github.com/go-pogo/errors"
 	sdlimg "github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var DefaultStageOpts = StageOpts{
+var DefaultOptions = Options{
 	// window options
-	PosX:        sdl.WINDOWPOS_UNDEFINED,
-	PosY:        sdl.WINDOWPOS_UNDEFINED,
-	WindowFlags: sdl.WINDOW_SHOWN | sdl.WINDOW_OPENGL,
+	PosX:           sdl.WINDOWPOS_CENTERED,
+	PosY:           sdl.WINDOWPOS_CENTERED,
+	WindowFlags:    sdl.WINDOW_SHOWN | sdl.WINDOW_INPUT_FOCUS,
+	FullscreenMode: 1,
 
 	// renderer options
 	RendererIndex: -1,
 	RendererFlags: sdl.RENDERER_ACCELERATED,
+	BgColor:       color.RGBA{},
 
 	// timer options
 	TargetFps:      DefaultFps,
 	WindowTitleFps: true,
 }
 
-type StageOpts struct {
+type Options struct {
 	Context context.Context
 
 	// sdl.Window options
 	// see https://wiki.libsdl.org/SDL_CreateWindow
-	PosX, PosY  int32
-	WindowFlags uint32
+	PosX, PosY     int32
+	WindowFlags    uint32
+	FullscreenMode uint32 // https://wiki.libsdl.org/SDL_SetWindowFullscreen
+
+	// sdl.DisplayMode options
+	// (https://wiki.libsdl.org/SDL_DisplayMode)
+	DisplayMode sdl.DisplayMode
 
 	// sdl.Renderer options
 	// see https://wiki.libsdl.org/SDL_CreateRenderer
 	RendererIndex int
 	RendererFlags uint32
 
-	Icon    []byte      // see https://wiki.libsdl.org/SDL_SetWindowIcon
 	BgColor color.Color // see https://wiki.libsdl.org/SDL_RenderClear
 
 	// timer
-	TargetFps      uint8
+	TargetFps      uint8 // todo: DisplayMode.RefreshRate
 	LimitFps       bool
 	WindowTitleFps bool
 }
@@ -56,6 +60,10 @@ type Stage struct {
 	ctx context.Context
 	cfn context.CancelFunc
 
+	minW, minH int32
+	fsMode     uint32
+
+	opts     Options
 	window   *sdl.Window
 	renderer *sdl.Renderer
 	viewport *Viewport
@@ -68,9 +76,9 @@ type Stage struct {
 }
 
 // NewStage creates a new Stage by first creating a new sdl.Window and
-// sdl.Renderer from the provided StageOpts.
-func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error) {
-	window, err := sdl.CreateWindow(title, opts.PosX, opts.PosY, width, height, opts.WindowFlags)
+// sdl.Renderer. These are configured with the provided Options.
+func NewStage(title string, w, h int32, opts Options) (*Stage, error) {
+	window, err := sdl.CreateWindow(title, opts.PosX, opts.PosY, w, h, opts.WindowFlags)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -84,12 +92,28 @@ func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error)
 	stage := &Stage{
 		window:   window,
 		renderer: renderer,
-		viewport: &Viewport{W: width, H: height},
+		viewport: &Viewport{W: w, H: h},
 		time:     NewTime(opts.TargetFps, clock),
 		clock:    clock,
 		scenes:   NewSceneManager(),
 
+		minW:   w,
+		minH:   h,
+		fsMode: opts.FullscreenMode,
+
 		WindowTitleFps: opts.WindowTitleFps,
+	}
+
+	index, err := window.GetDisplayIndex()
+	if err == nil {
+		var dm *sdl.DisplayMode
+		opts.DisplayMode.W = w
+		opts.DisplayMode.H = h
+
+		dm, err = GetClosestDisplayModeRatio(index, opts.DisplayMode)
+		if err == nil {
+			_ = window.SetDisplayMode(dm)
+		}
 	}
 
 	if col, ok := opts.BgColor.(color.RGBA); ok {
@@ -110,11 +134,6 @@ func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error)
 
 	stage.ctx, stage.cfn = context.WithCancel(opts.Context)
 	stage.time.LimitFps = opts.LimitFps
-	// stage.renderer.SetLogicalSize(width, height)
-
-	if opts.Icon != nil {
-		err = stage.setIcon(opts.Icon)
-	}
 
 	return stage, err
 }
@@ -122,7 +141,7 @@ func NewStage(title string, width, height int32, opts StageOpts) (*Stage, error)
 // MustNewStage creates a new Stage using NewStage and returns it on success.
 // Any returned errors from NewStage are passed to FailOnErr and result in a
 // fatal exit of the program.
-func MustNewStage(title string, width, height int32, opts StageOpts) *Stage {
+func MustNewStage(title string, width, height int32, opts Options) *Stage {
 	stage, err := NewStage(title, width, height, opts)
 	if err != nil {
 		FailOnErr(err)
@@ -130,7 +149,8 @@ func MustNewStage(title string, width, height int32, opts StageOpts) *Stage {
 	return stage
 }
 
-func (s *Stage) setIcon(icon []byte) error {
+// https://wiki.libsdl.org/SDL_SetWindowIcon
+func (s *Stage) SetWindowIcon(icon []byte) error {
 	src, err := sdl.RWFromMem(icon)
 	if err != nil {
 		return err
@@ -189,28 +209,35 @@ func (s *Stage) ClearScreen() error {
 
 func (s *Stage) PresentScreen() { s.renderer.Present() }
 
-const windowTitleFps = " | FPS: "
-
-func (s *Stage) UpdateWindowTitleFps() {
-	title := s.Window().GetTitle()
-	index := strings.LastIndex(title, windowTitleFps)
-	if index > 0 {
-		title = title[:index+len(windowTitleFps)]
-	} else {
-		title += windowTitleFps
+func (s *Stage) ToggleFullscreen() (err error) {
+	if s.window.GetFlags()&s.fsMode != 0 {
+		return s.window.SetFullscreen(0)
 	}
 
-	s.window.SetTitle(fmt.Sprintf("%s%.2f", title, s.time.avgPerSec.current))
+	return s.window.SetFullscreen(s.fsMode)
 }
 
-func (s *Stage) HandleWindowEvent(e *sdl.WindowEvent) error {
-	switch e.Event {
-	case sdl.WINDOWEVENT_SIZE_CHANGED:
-		s.viewport.W = e.Data1
-		s.viewport.H = e.Data2
+func (s *Stage) HandleKeyUpEvent(e *sdl.KeyboardEvent) error {
+	if e.Keysym.Scancode == sdl.SCANCODE_F11 {
+		return s.ToggleFullscreen()
+	}
+	return nil
+}
+
+func (s *Stage) HandleWindowSizeChangedEvent(e *sdl.WindowEvent) error {
+	if e.Data1 == s.minW && e.Data2 == s.minH {
+		s.viewport.W = s.minW
+		s.viewport.H = s.minH
+	} else {
+		s.viewport.W = s.minW
+		s.viewport.H = int32(float32(e.Data2) / (float32(e.Data1) / float32(s.minW)))
+		if s.viewport.H < s.minH {
+			s.viewport.W = int32(float32(e.Data1) / (float32(e.Data2) / float32(s.minH)))
+			s.viewport.H = s.minH
+		}
 	}
 
-	return nil
+	return s.renderer.SetLogicalSize(s.viewport.W, s.viewport.H)
 }
 
 func (s *Stage) Destroy() {
