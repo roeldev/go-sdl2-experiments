@@ -10,6 +10,7 @@ import (
 )
 
 type Scene interface {
+	SceneName() string
 	Process() error
 	Update(dt float64)
 	Render(r *sdl.Renderer) error
@@ -18,13 +19,13 @@ type Scene interface {
 //goland:noinspection SpellCheckingInspection
 type SceneActivater interface {
 	Scene
-	Activate()
+	Activate() error
 }
 
 //goland:noinspection SpellCheckingInspection
 type SceneDeactivater interface {
 	Scene
-	Deactivate()
+	Deactivate() error
 }
 
 type SceneDestroyer interface {
@@ -58,25 +59,8 @@ func (sm *SceneManager) Has(name string) bool {
 	return exists && scene != nil
 }
 
-func (sm *SceneManager) Add(name string, scene Scene, activate bool) {
-	sm.list[name] = scene
-
-	if activate {
-		sm.activate(name, scene)
-	}
-}
-
-func (sm *SceneManager) activate(name string, scene Scene) {
-	if sm.active != "" {
-		if s, ok := sm.list[sm.active].(SceneDeactivater); ok {
-			s.Deactivate()
-		}
-	}
-
-	sm.active = name
-	if a, ok := scene.(SceneActivater); ok {
-		a.Activate()
-	}
+func (sm *SceneManager) Add(scene Scene) {
+	sm.list[scene.SceneName()] = scene
 }
 
 func (sm *SceneManager) Activate(name string) (Scene, error) {
@@ -85,8 +69,19 @@ func (sm *SceneManager) Activate(name string) (Scene, error) {
 		return nil, errors.Newf("sdlkit.SceneManager: scene %s does not exist", name)
 	}
 
-	sm.activate(name, scene)
-	return scene, nil
+	var err error
+	if sm.active != "" {
+		if s, ok := sm.list[sm.active].(SceneDeactivater); ok {
+			errors.Append(&err, s.Deactivate())
+		}
+	}
+
+	sm.active = name
+	if a, ok := scene.(SceneActivater); ok {
+		errors.Append(&err, a.Activate())
+	}
+
+	return scene, err
 }
 
 func (sm *SceneManager) ScheduleActivation(name string) error {
