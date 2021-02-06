@@ -9,14 +9,9 @@ package event
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
+
+	"github.com/go-pogo/sdlkit"
 )
-
-const Quit quit = "QUIT"
-
-type quit string
-
-func (q quit) ExitCode() int { return 0 }
-func (q quit) Error() string { return string(q) }
 
 type Manager struct {
 	h handlers
@@ -26,7 +21,7 @@ func (m *Manager) Register(handler ...interface{}) { m.h.register(handler...) }
 
 func (m *Manager) Handle(event sdl.Event) (err error) {
 	if _, ok := event.(*sdl.QuitEvent); ok {
-		return Quit
+		return sdlkit.QUIT
 	}
 
 	return m.h.handle(event)

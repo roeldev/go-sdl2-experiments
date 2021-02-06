@@ -10,14 +10,21 @@ import (
 
 	"github.com/go-pogo/errors"
 	"github.com/veandco/go-sdl2/sdl"
-
-	"github.com/go-pogo/sdlkit/event"
 )
 
 var FatalErrorTitle = "fatal error"
 
+const QUIT quit = "QUIT"
+
+type quit string
+
+func (q quit) ExitCode() int { return 0 }
+func (q quit) Error() string { return string(q) }
+
+// FailOnErr shows a simple message box and exits the program when it receives
+// a non-nil error.
 func FailOnErr(possibleErr error) {
-	if possibleErr == nil || errors.Is(possibleErr, event.Quit) {
+	if possibleErr == nil || errors.Is(possibleErr, QUIT) {
 		return
 	}
 
