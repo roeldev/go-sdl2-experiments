@@ -6,9 +6,9 @@ package sdlkit
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
-
-	"github.com/go-pogo/sdlkit/geom"
 )
+
+type TrackMouseBtnState uint8
 
 //goland:noinspection GoUnusedConst
 const (
@@ -21,10 +21,8 @@ const (
 	TrackAllMouseButtons = TrackMouseBtnLeft | TrackMouseBtnRight | TrackMouseBtnMiddle | TrackMouseBtnX1 | TrackMouseBtnX2
 )
 
-type TrackMouseBtnState uint8
-
 type MouseState struct {
-	geom.Point
+	X, Y      float64
 	BtnLeft   *MouseBtnState
 	BtnRight  *MouseBtnState
 	BtnMiddle *MouseBtnState
@@ -51,6 +49,9 @@ func NewMouseState(trackBtns TrackMouseBtnState) *MouseState {
 	}
 	return ms
 }
+
+func (ms *MouseState) GetX() float64 { return ms.X }
+func (ms *MouseState) GetY() float64 { return ms.Y }
 
 func (ms *MouseState) HandleMouseButtonEvent(e *sdl.MouseButtonEvent) error {
 	switch e.Button {
@@ -85,7 +86,7 @@ func (ms *MouseState) HandleMouseMotionEvent(e *sdl.MouseMotionEvent) error {
 }
 
 type MouseBtnState struct {
-	geom.Point
+	X, Y     float64
 	Pressed  bool
 	Released bool
 	Clicks   uint8
@@ -98,6 +99,9 @@ type MouseBtnState struct {
 	// - sdl.BUTTON_X2
 	btn uint8
 }
+
+func (btn *MouseBtnState) GetX() float64 { return btn.X }
+func (btn *MouseBtnState) GetY() float64 { return btn.Y }
 
 func (btn *MouseBtnState) updateMouseBtnState(e *sdl.MouseButtonEvent) {
 	btn.X = float64(e.X)
