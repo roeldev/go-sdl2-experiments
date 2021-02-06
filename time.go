@@ -8,11 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-pogo/errors"
-	sdlgfx "github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
-
-	"github.com/go-pogo/sdlkit/geom"
 )
 
 const (
@@ -148,56 +144,11 @@ func (t *Time) Tick() float64 {
 	return t.delta
 }
 
-func (t *Time) CreateDisplay(x, y float64) *FpsDisplay {
-	display := &FpsDisplay{
-		time:        t,
-		Scale:       2,
-		TextColor:   sdl.Color{R: 255, G: 255, B: 255, A: 255},
-		ShadowColor: sdl.Color{A: 100},
-	}
-	display.X = x
-	display.Y = y
-	return display
-}
-
 func (t *Time) String() string {
 	if t.avgPerMin.current == 0 {
 		return t.avgPerSec.String()
 	}
 	return t.avgPerMin.String()
-}
-
-type FpsDisplay struct {
-	geom.Point
-	time *Time
-
-	Scale       float32
-	TextColor   sdl.Color
-	ShadowColor sdl.Color
-}
-
-func (d *FpsDisplay) Draw(r *sdl.Renderer) (err error) {
-	var x, y int32
-	var sx, sy float32
-
-	if d.Scale > 1 {
-		sx, sy = r.GetScale()
-		errors.Append(&err, r.SetScale(d.Scale, d.Scale))
-		x = int32(d.Point.X / float64(d.Scale))
-		y = int32(d.Point.Y / float64(d.Scale))
-	} else {
-		x = int32(d.Point.X)
-		y = int32(d.Point.Y)
-	}
-
-	fps := fmt.Sprintf("%.2f", d.time.Fps())
-	sdlgfx.StringColor(r, x+1, x+1, fps, d.ShadowColor) // shadow
-	sdlgfx.StringColor(r, x, y, fps, d.TextColor)
-
-	if d.Scale > 1 {
-		errors.Append(&err, r.SetScale(sx, sy))
-	}
-	return err
 }
 
 type avgFps struct {
