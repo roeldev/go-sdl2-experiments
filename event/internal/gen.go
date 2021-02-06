@@ -284,13 +284,13 @@ type handlers struct {
 	{{ $name }} []{{ interfaceName $name }}{{ end }}
 }
 
-func (h *handlers) register(handlers ...interface{}) {
-	for _, handler := range handlers {
-		{{ range $name, $_ := .Handlers }}
-		if v, ok := handler.({{ interfaceName $name }}); ok {
-			h.{{ $name }} = append(h.{{ $name }}, v)
-		} {{ end }}
-	}
+func (h *handlers) register(handler interface{}) (n uint) {
+	{{ range $name, $_ := .Handlers }}
+	if v, ok := handler.({{ interfaceName $name }}); ok {
+		h.{{ $name }} = append(h.{{ $name }}, v)
+		n++
+	} {{ end }}
+	return
 }
 
 func (h *handlers) handle(event sdl.Event) error {

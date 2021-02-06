@@ -8,6 +8,8 @@
 package event
 
 import (
+	"fmt"
+
 	"github.com/veandco/go-sdl2/sdl"
 
 	"github.com/go-pogo/sdlkit"
@@ -17,7 +19,14 @@ type Manager struct {
 	h handlers
 }
 
-func (m *Manager) Register(handler ...interface{}) { m.h.register(handler...) }
+func (m *Manager) Register(handler ...interface{}) {
+	for _, h := range handler {
+		if m.h.register(h) == 0 {
+			// todo: panic using log
+			panic(fmt.Sprintf("sdlkit event.Manager:\n\tcannot register `%T` as it does not have any event handlers methods that match\n\tmake sure the handler is of the correct type (eg. is a pointer to the type)", h))
+		}
+	}
+}
 
 func (m *Manager) Handle(event sdl.Event) (err error) {
 	if _, ok := event.(*sdl.QuitEvent); ok {

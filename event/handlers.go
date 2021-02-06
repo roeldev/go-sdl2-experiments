@@ -314,190 +314,249 @@ type handlers struct {
 	WindowTakeFocus         []WindowTakeFocusEventHandler
 }
 
-func (h *handlers) register(handlers ...interface{}) {
-	for _, handler := range handlers {
+func (h *handlers) register(handler interface{}) (n uint) {
 
-		if v, ok := handler.(AudioDeviceEventHandler); ok {
-			h.AudioDevice = append(h.AudioDevice, v)
-		}
-		if v, ok := handler.(AudioDeviceAddedEventHandler); ok {
-			h.AudioDeviceAdded = append(h.AudioDeviceAdded, v)
-		}
-		if v, ok := handler.(AudioDeviceRemovedEventHandler); ok {
-			h.AudioDeviceRemoved = append(h.AudioDeviceRemoved, v)
-		}
-		if v, ok := handler.(ClipboardEventHandler); ok {
-			h.Clipboard = append(h.Clipboard, v)
-		}
-		if v, ok := handler.(ControllerAxisEventHandler); ok {
-			h.ControllerAxis = append(h.ControllerAxis, v)
-		}
-		if v, ok := handler.(ControllerButtonEventHandler); ok {
-			h.ControllerButton = append(h.ControllerButton, v)
-		}
-		if v, ok := handler.(ControllerButtonDownEventHandler); ok {
-			h.ControllerButtonDown = append(h.ControllerButtonDown, v)
-		}
-		if v, ok := handler.(ControllerButtonUpEventHandler); ok {
-			h.ControllerButtonUp = append(h.ControllerButtonUp, v)
-		}
-		if v, ok := handler.(ControllerDeviceEventHandler); ok {
-			h.ControllerDevice = append(h.ControllerDevice, v)
-		}
-		if v, ok := handler.(ControllerDeviceAddedEventHandler); ok {
-			h.ControllerDeviceAdded = append(h.ControllerDeviceAdded, v)
-		}
-		if v, ok := handler.(ControllerDeviceMappedEventHandler); ok {
-			h.ControllerDeviceMapped = append(h.ControllerDeviceMapped, v)
-		}
-		if v, ok := handler.(ControllerDeviceRemovedEventHandler); ok {
-			h.ControllerDeviceRemoved = append(h.ControllerDeviceRemoved, v)
-		}
-		if v, ok := handler.(DisplayEventHandler); ok {
-			h.Display = append(h.Display, v)
-		}
-		if v, ok := handler.(DollarGestureEventHandler); ok {
-			h.DollarGesture = append(h.DollarGesture, v)
-		}
-		if v, ok := handler.(DropEventHandler); ok {
-			h.Drop = append(h.Drop, v)
-		}
-		if v, ok := handler.(JoyAxisEventHandler); ok {
-			h.JoyAxis = append(h.JoyAxis, v)
-		}
-		if v, ok := handler.(JoyBallEventHandler); ok {
-			h.JoyBall = append(h.JoyBall, v)
-		}
-		if v, ok := handler.(JoyButtonEventHandler); ok {
-			h.JoyButton = append(h.JoyButton, v)
-		}
-		if v, ok := handler.(JoyButtonDownEventHandler); ok {
-			h.JoyButtonDown = append(h.JoyButtonDown, v)
-		}
-		if v, ok := handler.(JoyButtonUpEventHandler); ok {
-			h.JoyButtonUp = append(h.JoyButtonUp, v)
-		}
-		if v, ok := handler.(JoyDeviceAddedEventHandler); ok {
-			h.JoyDeviceAdded = append(h.JoyDeviceAdded, v)
-		}
-		if v, ok := handler.(JoyDeviceRemovedEventHandler); ok {
-			h.JoyDeviceRemoved = append(h.JoyDeviceRemoved, v)
-		}
-		if v, ok := handler.(JoyHatEventHandler); ok {
-			h.JoyHat = append(h.JoyHat, v)
-		}
-		if v, ok := handler.(KeyDownEventHandler); ok {
-			h.KeyDown = append(h.KeyDown, v)
-		}
-		if v, ok := handler.(KeyUpEventHandler); ok {
-			h.KeyUp = append(h.KeyUp, v)
-		}
-		if v, ok := handler.(KeyboardEventHandler); ok {
-			h.Keyboard = append(h.Keyboard, v)
-		}
-		if v, ok := handler.(MouseButtonEventHandler); ok {
-			h.MouseButton = append(h.MouseButton, v)
-		}
-		if v, ok := handler.(MouseButtonDownEventHandler); ok {
-			h.MouseButtonDown = append(h.MouseButtonDown, v)
-		}
-		if v, ok := handler.(MouseButtonUpEventHandler); ok {
-			h.MouseButtonUp = append(h.MouseButtonUp, v)
-		}
-		if v, ok := handler.(MouseMotionEventHandler); ok {
-			h.MouseMotion = append(h.MouseMotion, v)
-		}
-		if v, ok := handler.(MouseWheelEventHandler); ok {
-			h.MouseWheel = append(h.MouseWheel, v)
-		}
-		if v, ok := handler.(MultiGestureEventHandler); ok {
-			h.MultiGesture = append(h.MultiGesture, v)
-		}
-		if v, ok := handler.(OSEventHandler); ok {
-			h.OS = append(h.OS, v)
-		}
-		if v, ok := handler.(RenderEventHandler); ok {
-			h.Render = append(h.Render, v)
-		}
-		if v, ok := handler.(SensorEventHandler); ok {
-			h.Sensor = append(h.Sensor, v)
-		}
-		if v, ok := handler.(SysWMEventHandler); ok {
-			h.SysWM = append(h.SysWM, v)
-		}
-		if v, ok := handler.(TextEditingEventHandler); ok {
-			h.TextEditing = append(h.TextEditing, v)
-		}
-		if v, ok := handler.(TextInputEventHandler); ok {
-			h.TextInput = append(h.TextInput, v)
-		}
-		if v, ok := handler.(TouchFingerEventHandler); ok {
-			h.TouchFinger = append(h.TouchFinger, v)
-		}
-		if v, ok := handler.(TouchFingerDownEventHandler); ok {
-			h.TouchFingerDown = append(h.TouchFingerDown, v)
-		}
-		if v, ok := handler.(TouchFingerMotionEventHandler); ok {
-			h.TouchFingerMotion = append(h.TouchFingerMotion, v)
-		}
-		if v, ok := handler.(TouchFingerUpEventHandler); ok {
-			h.TouchFingerUp = append(h.TouchFingerUp, v)
-		}
-		if v, ok := handler.(UserEventHandler); ok {
-			h.User = append(h.User, v)
-		}
-		if v, ok := handler.(WindowEventHandler); ok {
-			h.Window = append(h.Window, v)
-		}
-		if v, ok := handler.(WindowCloseEventHandler); ok {
-			h.WindowClose = append(h.WindowClose, v)
-		}
-		if v, ok := handler.(WindowEnterEventHandler); ok {
-			h.WindowEnter = append(h.WindowEnter, v)
-		}
-		if v, ok := handler.(WindowExposedEventHandler); ok {
-			h.WindowExposed = append(h.WindowExposed, v)
-		}
-		if v, ok := handler.(WindowFocusGainedEventHandler); ok {
-			h.WindowFocusGained = append(h.WindowFocusGained, v)
-		}
-		if v, ok := handler.(WindowFocusLostEventHandler); ok {
-			h.WindowFocusLost = append(h.WindowFocusLost, v)
-		}
-		if v, ok := handler.(WindowHiddenEventHandler); ok {
-			h.WindowHidden = append(h.WindowHidden, v)
-		}
-		if v, ok := handler.(WindowHitTestEventHandler); ok {
-			h.WindowHitTest = append(h.WindowHitTest, v)
-		}
-		if v, ok := handler.(WindowLeaveEventHandler); ok {
-			h.WindowLeave = append(h.WindowLeave, v)
-		}
-		if v, ok := handler.(WindowMaximizedEventHandler); ok {
-			h.WindowMaximized = append(h.WindowMaximized, v)
-		}
-		if v, ok := handler.(WindowMinimizedEventHandler); ok {
-			h.WindowMinimized = append(h.WindowMinimized, v)
-		}
-		if v, ok := handler.(WindowMovedEventHandler); ok {
-			h.WindowMoved = append(h.WindowMoved, v)
-		}
-		if v, ok := handler.(WindowResizedEventHandler); ok {
-			h.WindowResized = append(h.WindowResized, v)
-		}
-		if v, ok := handler.(WindowRestoredEventHandler); ok {
-			h.WindowRestored = append(h.WindowRestored, v)
-		}
-		if v, ok := handler.(WindowShownEventHandler); ok {
-			h.WindowShown = append(h.WindowShown, v)
-		}
-		if v, ok := handler.(WindowSizeChangedEventHandler); ok {
-			h.WindowSizeChanged = append(h.WindowSizeChanged, v)
-		}
-		if v, ok := handler.(WindowTakeFocusEventHandler); ok {
-			h.WindowTakeFocus = append(h.WindowTakeFocus, v)
-		}
+	if v, ok := handler.(AudioDeviceEventHandler); ok {
+		h.AudioDevice = append(h.AudioDevice, v)
+		n++
 	}
+	if v, ok := handler.(AudioDeviceAddedEventHandler); ok {
+		h.AudioDeviceAdded = append(h.AudioDeviceAdded, v)
+		n++
+	}
+	if v, ok := handler.(AudioDeviceRemovedEventHandler); ok {
+		h.AudioDeviceRemoved = append(h.AudioDeviceRemoved, v)
+		n++
+	}
+	if v, ok := handler.(ClipboardEventHandler); ok {
+		h.Clipboard = append(h.Clipboard, v)
+		n++
+	}
+	if v, ok := handler.(ControllerAxisEventHandler); ok {
+		h.ControllerAxis = append(h.ControllerAxis, v)
+		n++
+	}
+	if v, ok := handler.(ControllerButtonEventHandler); ok {
+		h.ControllerButton = append(h.ControllerButton, v)
+		n++
+	}
+	if v, ok := handler.(ControllerButtonDownEventHandler); ok {
+		h.ControllerButtonDown = append(h.ControllerButtonDown, v)
+		n++
+	}
+	if v, ok := handler.(ControllerButtonUpEventHandler); ok {
+		h.ControllerButtonUp = append(h.ControllerButtonUp, v)
+		n++
+	}
+	if v, ok := handler.(ControllerDeviceEventHandler); ok {
+		h.ControllerDevice = append(h.ControllerDevice, v)
+		n++
+	}
+	if v, ok := handler.(ControllerDeviceAddedEventHandler); ok {
+		h.ControllerDeviceAdded = append(h.ControllerDeviceAdded, v)
+		n++
+	}
+	if v, ok := handler.(ControllerDeviceMappedEventHandler); ok {
+		h.ControllerDeviceMapped = append(h.ControllerDeviceMapped, v)
+		n++
+	}
+	if v, ok := handler.(ControllerDeviceRemovedEventHandler); ok {
+		h.ControllerDeviceRemoved = append(h.ControllerDeviceRemoved, v)
+		n++
+	}
+	if v, ok := handler.(DisplayEventHandler); ok {
+		h.Display = append(h.Display, v)
+		n++
+	}
+	if v, ok := handler.(DollarGestureEventHandler); ok {
+		h.DollarGesture = append(h.DollarGesture, v)
+		n++
+	}
+	if v, ok := handler.(DropEventHandler); ok {
+		h.Drop = append(h.Drop, v)
+		n++
+	}
+	if v, ok := handler.(JoyAxisEventHandler); ok {
+		h.JoyAxis = append(h.JoyAxis, v)
+		n++
+	}
+	if v, ok := handler.(JoyBallEventHandler); ok {
+		h.JoyBall = append(h.JoyBall, v)
+		n++
+	}
+	if v, ok := handler.(JoyButtonEventHandler); ok {
+		h.JoyButton = append(h.JoyButton, v)
+		n++
+	}
+	if v, ok := handler.(JoyButtonDownEventHandler); ok {
+		h.JoyButtonDown = append(h.JoyButtonDown, v)
+		n++
+	}
+	if v, ok := handler.(JoyButtonUpEventHandler); ok {
+		h.JoyButtonUp = append(h.JoyButtonUp, v)
+		n++
+	}
+	if v, ok := handler.(JoyDeviceAddedEventHandler); ok {
+		h.JoyDeviceAdded = append(h.JoyDeviceAdded, v)
+		n++
+	}
+	if v, ok := handler.(JoyDeviceRemovedEventHandler); ok {
+		h.JoyDeviceRemoved = append(h.JoyDeviceRemoved, v)
+		n++
+	}
+	if v, ok := handler.(JoyHatEventHandler); ok {
+		h.JoyHat = append(h.JoyHat, v)
+		n++
+	}
+	if v, ok := handler.(KeyDownEventHandler); ok {
+		h.KeyDown = append(h.KeyDown, v)
+		n++
+	}
+	if v, ok := handler.(KeyUpEventHandler); ok {
+		h.KeyUp = append(h.KeyUp, v)
+		n++
+	}
+	if v, ok := handler.(KeyboardEventHandler); ok {
+		h.Keyboard = append(h.Keyboard, v)
+		n++
+	}
+	if v, ok := handler.(MouseButtonEventHandler); ok {
+		h.MouseButton = append(h.MouseButton, v)
+		n++
+	}
+	if v, ok := handler.(MouseButtonDownEventHandler); ok {
+		h.MouseButtonDown = append(h.MouseButtonDown, v)
+		n++
+	}
+	if v, ok := handler.(MouseButtonUpEventHandler); ok {
+		h.MouseButtonUp = append(h.MouseButtonUp, v)
+		n++
+	}
+	if v, ok := handler.(MouseMotionEventHandler); ok {
+		h.MouseMotion = append(h.MouseMotion, v)
+		n++
+	}
+	if v, ok := handler.(MouseWheelEventHandler); ok {
+		h.MouseWheel = append(h.MouseWheel, v)
+		n++
+	}
+	if v, ok := handler.(MultiGestureEventHandler); ok {
+		h.MultiGesture = append(h.MultiGesture, v)
+		n++
+	}
+	if v, ok := handler.(OSEventHandler); ok {
+		h.OS = append(h.OS, v)
+		n++
+	}
+	if v, ok := handler.(RenderEventHandler); ok {
+		h.Render = append(h.Render, v)
+		n++
+	}
+	if v, ok := handler.(SensorEventHandler); ok {
+		h.Sensor = append(h.Sensor, v)
+		n++
+	}
+	if v, ok := handler.(SysWMEventHandler); ok {
+		h.SysWM = append(h.SysWM, v)
+		n++
+	}
+	if v, ok := handler.(TextEditingEventHandler); ok {
+		h.TextEditing = append(h.TextEditing, v)
+		n++
+	}
+	if v, ok := handler.(TextInputEventHandler); ok {
+		h.TextInput = append(h.TextInput, v)
+		n++
+	}
+	if v, ok := handler.(TouchFingerEventHandler); ok {
+		h.TouchFinger = append(h.TouchFinger, v)
+		n++
+	}
+	if v, ok := handler.(TouchFingerDownEventHandler); ok {
+		h.TouchFingerDown = append(h.TouchFingerDown, v)
+		n++
+	}
+	if v, ok := handler.(TouchFingerMotionEventHandler); ok {
+		h.TouchFingerMotion = append(h.TouchFingerMotion, v)
+		n++
+	}
+	if v, ok := handler.(TouchFingerUpEventHandler); ok {
+		h.TouchFingerUp = append(h.TouchFingerUp, v)
+		n++
+	}
+	if v, ok := handler.(UserEventHandler); ok {
+		h.User = append(h.User, v)
+		n++
+	}
+	if v, ok := handler.(WindowEventHandler); ok {
+		h.Window = append(h.Window, v)
+		n++
+	}
+	if v, ok := handler.(WindowCloseEventHandler); ok {
+		h.WindowClose = append(h.WindowClose, v)
+		n++
+	}
+	if v, ok := handler.(WindowEnterEventHandler); ok {
+		h.WindowEnter = append(h.WindowEnter, v)
+		n++
+	}
+	if v, ok := handler.(WindowExposedEventHandler); ok {
+		h.WindowExposed = append(h.WindowExposed, v)
+		n++
+	}
+	if v, ok := handler.(WindowFocusGainedEventHandler); ok {
+		h.WindowFocusGained = append(h.WindowFocusGained, v)
+		n++
+	}
+	if v, ok := handler.(WindowFocusLostEventHandler); ok {
+		h.WindowFocusLost = append(h.WindowFocusLost, v)
+		n++
+	}
+	if v, ok := handler.(WindowHiddenEventHandler); ok {
+		h.WindowHidden = append(h.WindowHidden, v)
+		n++
+	}
+	if v, ok := handler.(WindowHitTestEventHandler); ok {
+		h.WindowHitTest = append(h.WindowHitTest, v)
+		n++
+	}
+	if v, ok := handler.(WindowLeaveEventHandler); ok {
+		h.WindowLeave = append(h.WindowLeave, v)
+		n++
+	}
+	if v, ok := handler.(WindowMaximizedEventHandler); ok {
+		h.WindowMaximized = append(h.WindowMaximized, v)
+		n++
+	}
+	if v, ok := handler.(WindowMinimizedEventHandler); ok {
+		h.WindowMinimized = append(h.WindowMinimized, v)
+		n++
+	}
+	if v, ok := handler.(WindowMovedEventHandler); ok {
+		h.WindowMoved = append(h.WindowMoved, v)
+		n++
+	}
+	if v, ok := handler.(WindowResizedEventHandler); ok {
+		h.WindowResized = append(h.WindowResized, v)
+		n++
+	}
+	if v, ok := handler.(WindowRestoredEventHandler); ok {
+		h.WindowRestored = append(h.WindowRestored, v)
+		n++
+	}
+	if v, ok := handler.(WindowShownEventHandler); ok {
+		h.WindowShown = append(h.WindowShown, v)
+		n++
+	}
+	if v, ok := handler.(WindowSizeChangedEventHandler); ok {
+		h.WindowSizeChanged = append(h.WindowSizeChanged, v)
+		n++
+	}
+	if v, ok := handler.(WindowTakeFocusEventHandler); ok {
+		h.WindowTakeFocus = append(h.WindowTakeFocus, v)
+		n++
+	}
+	return
 }
 
 func (h *handlers) handle(event sdl.Event) error {
