@@ -1,3 +1,7 @@
+// Copyright (c) 2021, Roel Schut. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package geom
 
 import (
@@ -11,9 +15,8 @@ import (
 type Polygon struct {
 	// X and Y indicate the absolute position of the Polygon.
 	X, Y float64
-	// Origin point is relative to position.
-	Origin Point
 
+	origin Point       // origin point relative to position.
 	len    int         // number of edges
 	model  []Point     // original points relative to pos
 	actual []Point     // actual points relative to pos
@@ -51,7 +54,7 @@ func NewRegularPolygon(x, y, cr float64, n uint8) *Polygon {
 
 	var i uint8
 	for ; i < n; i++ {
-		rad := DegToRad((180 - angle) * float64(i))
+		rad := DegToRad(360 - (180-angle)*float64(i))
 		points[i].X = math.Cos(rad) * cr
 		points[i].Y = math.Sin(rad) * cr
 	}
@@ -61,7 +64,11 @@ func NewRegularPolygon(x, y, cr float64, n uint8) *Polygon {
 
 // NewTrigon creates a new Polygon with 3 sides.
 func NewTrigon(x, y, w, h float64) *Polygon {
-	t := NewPolygon(x, y, []Point{{X: w}, {Y: h / 2}, {Y: -h / 2}})
+	t := NewPolygon(x, y, []Point{
+		{X: w},      // right middle
+		{Y: -h / 2}, // top left
+		{Y: h / 2},  // bottom left
+	})
 
 	// calculate centroid of triangle points
 	var dx, dy float64
@@ -79,24 +86,70 @@ func NewTrigon(x, y, w, h float64) *Polygon {
 		t.model[i].Y -= dy
 	}
 
-	// t.area = (w * h) / 2
+	t.Transform(IdentityMatrix())
 	return t
 }
 
 // NewQuad creates a new Polygon where all angles are 90 degrees. It differs
-// from a Rectangle in the fact it can be rotated, scaled and skewed using a
+// from a Rect in the fact it can be rotated, scaled and skewed using a
 // Matrix.
 func NewQuad(x, y, w, h float64) *Polygon {
-	q := NewPolygon(x, y, []Point{{0, 0}, {w, 0}, {w, h}, {0, h}})
-	q.Origin.X = -w / 2
-	q.Origin.Y = -h / 2
-	// q.area = w * h
-	return q
+	w, h = w/2, h/2
+	return NewPolygon(x, y, []Point{
+		{X: w, Y: -h},  // top right
+		{X: -w, Y: -h}, // top left
+		{X: -w, Y: h},  // bottom left
+		{X: w, Y: h},   // bottom right
+	})
 }
 
-func (p *Polygon) Position() Point { return Point{X: p.X, Y: p.Y} }
-
+func (p *Polygon) GetX() float64  { return p.X }
+func (p *Polygon) GetY() float64  { return p.Y }
+func (p *Polygon) Origin() *Point { return &p.origin }
 func (p *Polygon) Model() []Point { return p.model }
+
+func (p *Polygon) Area() float64 {
+	var res float64
+	var p1, p2 Point
+
+	n := p.len - 1
+	for i := 0; i <= n; i++ {
+		p1 = p.actual[i]
+		if i == n {
+			p2 = p.actual[0]
+		} else {
+			p2 = p.actual[i+1]
+		}
+
+		res += (p1.X * p2.Y) - (p1.Y * p2.X)
+	}
+
+	return math.Abs(res) / 2
+}
+
+func (p *Polygon) Bounds() AABB {
+	bounds := AABB{
+		X: math.MaxFloat64,
+		Y: math.MaxFloat64,
+		W: math.SmallestNonzeroFloat64,
+		H: math.SmallestNonzeroFloat64,
+	}
+	for _, pt := range p.actual {
+		bounds.X = math.Min(bounds.X, pt.X)
+		bounds.Y = math.Min(bounds.Y, pt.Y)
+		bounds.W = math.Max(bounds.W, pt.X)
+		bounds.H = math.Max(bounds.H, pt.Y)
+	}
+
+	// convert max x/y to width and height
+	bounds.W -= bounds.X
+	bounds.H -= bounds.Y
+
+	// min x/y are still relative to x/y of the polygon, fix this
+	bounds.X += p.X
+	bounds.Y += p.Y
+	return bounds
+}
 
 func (p *Polygon) Edges() []Point {
 	res := make([]Point, p.len)
@@ -109,15 +162,36 @@ func (p *Polygon) Edges() []Point {
 
 func (p *Polygon) LinePoints() []sdl.Point { return p.lines }
 
+// https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html
+func (p *Polygon) HitTest(x, y float64) bool {
+	if p.len > 5 && !p.Bounds().HitTest(x, y) {
+		return false
+	}
+
+	var c bool
+	for i, j := 0, p.len-1; i < p.len; i++ {
+		p1, p2 := p.actual[i], p.actual[j]
+		if ((p1.Y+p.Y > y) != (p2.Y+p.Y > y)) &&
+			(x < ((p2.X-p1.X)*(y-p1.Y-p.Y))/(p2.Y-p1.Y)+p1.X+p.X) {
+			c = !c
+		}
+		j = i
+	}
+
+	return c
+}
+
+func (p *Polygon) HitTestXY(xy XYGetter) bool { return p.HitTest(xy.GetX(), xy.GetY()) }
+
 func (p *Polygon) Transform(matrix Matrix) {
 	for i, pt := range p.model {
-		ax := ((pt.X + p.Origin.X) * matrix[ME_A]) + ((pt.Y + p.Origin.Y) * matrix[ME_C]) + matrix[ME_TX]
-		ay := ((pt.X + p.Origin.X) * matrix[ME_B]) + ((pt.Y + p.Origin.Y) * matrix[ME_D]) + matrix[ME_TY]
+		ax := ((pt.X + p.origin.X) * matrix[ME_A]) + ((pt.Y + p.origin.Y) * matrix[ME_C]) + matrix[ME_TX]
+		ay := ((pt.X + p.origin.X) * matrix[ME_B]) + ((pt.Y + p.origin.Y) * matrix[ME_D]) + matrix[ME_TY]
 
 		p.actual[i].X = ax
 		p.actual[i].Y = ay
-		p.lines[i].X = int32(p.X + ax)
-		p.lines[i].Y = int32(p.Y + ay)
+		p.lines[i].X = int32(ax + p.X)
+		p.lines[i].Y = int32(ay + p.Y)
 	}
 
 	// close draw loop with first point

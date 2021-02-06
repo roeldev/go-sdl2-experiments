@@ -8,9 +8,18 @@ import (
 	"math"
 )
 
+// A Transformer is any object that can be transformed using a transform Matrix.
+type Transformer interface {
+	Origin() *Point
+	Transform(matrix Matrix)
+}
+
+// Transform calculates various transformations and merges them to a Matrix
+// which can be applied to a Transformer.
 type Transform struct {
 	Rotation,
 	ScaleX, ScaleY,
+	// SkewX, SkewY,
 	TranslateX, TranslateY float64
 }
 
@@ -28,30 +37,30 @@ func (t Transform) Matrix() Matrix {
 
 // Matrix is a 3x3 matrix of float64 values.
 type Matrix [9]float64
-type MatrixElement int
+type TransformMatrixElement int
 
 //goland:noinspection GoSnakeCaseUsage
 const (
-	ME_A  MatrixElement = 0
-	ME_B                = 3
-	ME_C                = 1
-	ME_D                = 4
-	ME_TX               = 2
-	ME_TY               = 5
+	ME_A  TransformMatrixElement = 0
+	ME_B                         = 3
+	ME_C                         = 1
+	ME_D                         = 4
+	ME_TX                        = 2
+	ME_TY                        = 5
 )
 
-// TransformMatrix creates a Matrix with the following values:
+// TransformMatrix creates a Matrix with the following elements:
 //   [ a, c, tx,
 //     b, d, ty,
-//     0, 0, 1 ]
+//     u, v, w ]
 //
-// The values A and D affect the positioning of pixels along the x and y axis
-// when scaling or rotating. B and C are the values that affect the positioning
-// of pixels along the x and y axis when rotating or skewing.
+// The elements A and D affect the positioning of pixels along the x and y axis
+// when scaling or rotating. B and C are the elements that affect the
+// positioning of pixels along the x and y axis when rotating or skewing.
 // TX and TY are the distances by which to translate each point along the x and
 // y axis.
 // The Matrix operates in 2D space so it always assumes that the (last three)
-// property values u and v are 0.0, and w is 1.0.
+// elements u and v are 0.0, and w is 1.0.
 // https://en.wikipedia.org/wiki/Transformation_matrix
 // https://www.tutorialspoint.com/computer_graphics/2d_transformation.htm
 func TransformMatrix(a, b, c, d, tx, ty float64) Matrix {
@@ -65,8 +74,8 @@ func ScaleMatrix(x, y float64) Matrix {
 // RotationMatrix creates a Matrix which rotates the target by an angle,
 // measured in radians.
 // https://en.wikipedia.org/wiki/Rotation_matrix
-func RotationMatrix(angle float64) Matrix {
-	cos, sin := math.Cos(angle), math.Sin(angle)
+func RotationMatrix(radians float64) Matrix {
+	cos, sin := math.Cos(radians), math.Sin(radians)
 	return TransformMatrix(cos, sin, -sin, cos, 0, 0)
 }
 
@@ -80,4 +89,100 @@ func SkewMatrix(x, y float64) Matrix {
 // the target.
 func IdentityMatrix() Matrix {
 	return Matrix{1, 0, 0, 0, 1, 0, 0, 0, 1}
+}
+
+//goland:noinspection GoUnusedConst
+const (
+	ConstraintRotation = 1 << iota
+	ConstraintScaleX
+	ConstraintScaleY
+	ConstraintSkewX
+	ConstraintSkewY
+	ConstraintTranslateX
+	ConstraintTranslateY
+
+	ConstraintScale     = ConstraintScaleX | ConstraintScaleY
+	ConstraintSkew      = ConstraintSkewX | ConstraintSkewY
+	ConstraintTranslate = ConstraintTranslateX | ConstraintTranslateY
+	ConstraintAll       = ConstraintRotation | ConstraintScale | ConstraintSkew | ConstraintTranslate
+)
+
+type TransformConstraint uint8
+
+func (tc TransformConstraint) Has(c TransformConstraint) bool { return tc&c != 0 }
+
+func (tc *TransformConstraint) Set(c TransformConstraint) { *tc = c }
+
+func (tc *TransformConstraint) Add(c TransformConstraint) { *tc |= c }
+
+func (tc *TransformConstraint) Remove(c TransformConstraint) { *tc &^= c }
+
+func (tc *TransformConstraint) Clear() { *tc = 0 }
+
+type TransformComponent struct {
+	transform   Transform
+	constraints TransformConstraint
+}
+
+func (tc TransformComponent) ApplyTransform(t Transformer) {
+	t.Transform(tc.transform.Matrix())
+}
+
+func (tc *TransformComponent) TransformConstraints() *TransformConstraint {
+	return &tc.constraints
+}
+
+// Rotation sets the rotation transformation to the given amount of radians.
+func (tc *TransformComponent) Rotation(radians float64) {
+	if !tc.constraints.Has(ConstraintRotation) {
+		tc.transform.Rotation = radians
+	}
+}
+
+// Rotate adds the given radians to the rotation transformation.
+func (tc *TransformComponent) Rotate(radians float64) {
+	if !tc.constraints.Has(ConstraintRotation) {
+		tc.transform.Rotation += radians
+	}
+}
+
+// RotateDeg adds the given degrees to the rotation transformation.
+func (tc *TransformComponent) RotateDeg(degrees float64) {
+	if !tc.constraints.Has(ConstraintRotation) {
+		tc.transform.Rotation += degrees * D2R
+	}
+}
+
+func (tc *TransformComponent) Scale(scale float64) {
+	tc.ScaleX(scale)
+	tc.ScaleY(scale)
+}
+
+func (tc *TransformComponent) ScaleX(scaleX float64) {
+	if !tc.constraints.Has(ConstraintScaleX) {
+		tc.transform.ScaleX = scaleX
+	}
+}
+
+func (tc *TransformComponent) ScaleY(scaleY float64) {
+	if !tc.constraints.Has(ConstraintScaleY) {
+		tc.transform.ScaleY = scaleY
+	}
+}
+
+func (tc *TransformComponent) Translate(translate float64) {
+	tc.TranslateX(translate)
+	tc.TranslateY(translate)
+}
+
+func (tc *TransformComponent) TranslateX(translateX float64) {
+	if !tc.constraints.Has(ConstraintTranslateX) {
+		tc.transform.TranslateX = translateX
+	}
+}
+
+func (tc *TransformComponent) TranslateY(translateY float64) {
+	if !tc.constraints.Has(ConstraintTranslateY) {
+		tc.transform.TranslateY = translateY
+	}
 }

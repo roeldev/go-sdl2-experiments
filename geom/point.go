@@ -12,34 +12,45 @@ type Point struct {
 	X, Y float64
 }
 
+// PointFromInt creates a new Point from int32 values.
+func PointFromInt(x, y int32) *Point {
+	return &Point{X: float64(x), Y: float64(y)}
+}
+
+// PointFromXY creates a new Point from a XYGetter.
+func PointFromXY(xy XYGetter) *Point {
+	return &Point{X: xy.GetX(), Y: xy.GetY()}
+}
+
+func (p Point) GetX() float64 { return p.X }
+func (p Point) GetY() float64 { return p.Y }
+
+func (p *Point) SetX(x float64) { p.X = x }
+func (p *Point) SetY(y float64) { p.Y = y }
+
 // Vector returns a Vector with the same X and Y values as Point.
 func (p Point) Vector() Vector { return Vector{X: p.X, Y: p.Y} }
 
-// InCircle returns true when the Point is inside the circle, defined by the
-// provided cx, cy and rad values. It calculates the squared distance between
-// the Point and cx/cy and compares this with the squared rad value.
-func (p Point) InCircle(circle Circle) bool {
-	return InCircle(p.X, p.Y, circle.X, circle.Y, circle.Radius)
+// HitTest returns a boolean indicating whether the X and Y values of Point are
+// within the target HitTester.
+func (p Point) HitTest(target HitTester) bool {
+	return target.HitTest(p.X, p.Y)
 }
 
-func (p Point) InRectangle(r Rectangle) bool {
-	return InRect(p.X, p.Y, r.X, r.Y, r.W, r.H)
-}
-
+// InRect returns a bool indicating whether the X and Y values of Point are
+// within the sdl.Rect.
 func (p Point) InRect(r sdl.Rect) bool {
-	return InRect(p.X, p.Y,
+	return hitTestRect(p.X, p.Y,
 		float64(r.X), float64(r.Y),
 		float64(r.W), float64(r.H),
 	)
 }
 
+// InFRect returns a bool indicating whether the X and Y values of Point are
+// within the sdl.FRect.
 func (p Point) InFRect(r sdl.FRect) bool {
-	return InRect(p.X, p.Y,
+	return hitTestRect(p.X, p.Y,
 		float64(r.X), float64(r.Y),
 		float64(r.W), float64(r.H),
 	)
-}
-
-func (p Point) InPolygon(poly Polygon) bool {
-	return InPolygon(p.X, p.Y, poly.Edges())
 }
