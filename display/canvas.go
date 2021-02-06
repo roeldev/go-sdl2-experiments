@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sdlkit
+package display
 
 import (
 	"github.com/go-pogo/errors"
 	sdlgfx "github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
+
+	"github.com/go-pogo/sdlkit"
+	"github.com/go-pogo/sdlkit/geom"
 )
 
+// todo: canvas in pool?
 type Canvas struct {
 	renderer *sdl.Renderer
 	target   *sdl.Texture
@@ -79,6 +83,18 @@ func (c *Canvas) BeginFill(color sdl.Color) {
 	c.fill = true
 }
 
+func (c *Canvas) BeginFillRGBA(r, g, b, a uint8) {
+	if c.blendMode == sdl.BLENDMODE_NONE {
+		a = 0xFF
+	}
+
+	c.fillColor.R = r
+	c.fillColor.G = g
+	c.fillColor.B = b
+	c.fillColor.A = a
+	c.fill = true
+}
+
 func (c *Canvas) EndFill() { c.fill = false }
 
 func (c *Canvas) LineStyle(thickness int32, color sdl.Color) {
@@ -88,6 +104,10 @@ func (c *Canvas) LineStyle(thickness int32, color sdl.Color) {
 }
 
 func (c *Canvas) EndLineStyle() { c.line = false }
+
+func (c *Canvas) Draw(d sdlkit.Drawable) {
+	c.catchErr(d.Draw(c.renderer))
+}
 
 func (c *Canvas) DrawPixel(x, y, size int32) {
 	if size < 2 {
@@ -109,6 +129,14 @@ func (c *Canvas) DrawPixel(x, y, size int32) {
 	)
 }
 
+func (c *Canvas) DrawPixelF(x, y float64, size int32) {
+	c.DrawPixel(int32(x), int32(y), size)
+}
+
+func (c *Canvas) DrawPixelXY(xy geom.XYGetter, size int32) {
+	c.DrawPixel(int32(xy.GetX()), int32(xy.GetY()), size)
+}
+
 func (c *Canvas) DrawLine(x1, y1, x2, y2 int32) {
 	if !c.line {
 		return
@@ -122,6 +150,10 @@ func (c *Canvas) DrawLine(x1, y1, x2, y2 int32) {
 	}
 }
 
+func (c *Canvas) DrawLineF(x1, y1, x2, y2 float64) {
+	c.DrawLine(int32(x1), int32(y1), int32(x2), int32(y2))
+}
+
 func (c *Canvas) DrawEllipse(x, y, rx, ry int32) {
 	if c.fill {
 		sdlgfx.FilledEllipseColor(c.renderer, x, y, rx, ry, c.fillColor)
@@ -133,10 +165,30 @@ func (c *Canvas) DrawEllipse(x, y, rx, ry int32) {
 	}
 }
 
+func (c *Canvas) DrawEllipseF(x, y, rx, ry float64) {
+	c.DrawEllipse(int32(x), int32(y), int32(rx), int32(ry))
+}
+
+func (c *Canvas) DrawEllipseS(es geom.Ellipse) {
+	c.DrawEllipse(int32(es.X), int32(es.Y), int32(es.RadiusX), int32(es.RadiusY))
+}
+
 func (c *Canvas) DrawCircle(x, y, rad int32) { c.DrawEllipse(x, y, rad, rad) }
 
-func (c *Canvas) DrawRect(x, y, w, h int32) {
-	rect := &sdl.Rect{X: x, Y: y, W: w, H: h}
+func (c *Canvas) DrawCircleF(x, y, rad float64) {
+	c.DrawEllipse(int32(x), int32(y), int32(rad), int32(rad))
+}
+
+func (c *Canvas) DrawCircleS(cs geom.Circle) {
+	c.DrawEllipse(
+		int32(cs.X-0.5),
+		int32(cs.Y-0.5),
+		int32(cs.Radius-1),
+		int32(cs.Radius-1),
+	)
+}
+
+func (c *Canvas) DrawRect(rect *sdl.Rect) {
 	if c.fill {
 		c.catchErr(
 			c.renderer.SetDrawColor(c.fillColor.R, c.fillColor.G, c.fillColor.B, c.fillColor.A),
@@ -151,7 +203,26 @@ func (c *Canvas) DrawRect(x, y, w, h int32) {
 	}
 }
 
-func (c *Canvas) DrawSquare(x, y, size int32) { c.DrawRect(x, y, size, size) }
+func (c *Canvas) DrawRectF(x, y, w, h float64) {
+	c.DrawRect(&sdl.Rect{X: int32(x), Y: int32(y), W: int32(w), H: int32(h)})
+}
+
+func (c *Canvas) DrawRectS(rs geom.Rect) { c.DrawRect(rs.Rect()) }
+
+func (c *Canvas) DrawFRect(rect *sdl.FRect) {
+	if c.fill {
+		c.catchErr(
+			c.renderer.SetDrawColor(c.fillColor.R, c.fillColor.G, c.fillColor.B, c.fillColor.A),
+			c.renderer.FillRectF(rect),
+		)
+	}
+	if c.line {
+		c.catchErr(
+			c.renderer.SetDrawColor(c.lineColor.R, c.lineColor.G, c.lineColor.B, c.lineColor.A),
+			c.renderer.DrawRectF(rect),
+		)
+	}
+}
 
 func (c *Canvas) DrawRoundRect(x, y, w, h, rad int32) {
 	x2, y2 := x+w, y+h
@@ -161,6 +232,10 @@ func (c *Canvas) DrawRoundRect(x, y, w, h, rad int32) {
 	if c.line {
 		sdlgfx.RoundedRectangleColor(c.renderer, x, y, x2, y2, rad, c.lineColor)
 	}
+}
+
+func (c *Canvas) DrawRoundRectF(x, y, w, h, rad float64) {
+	c.DrawRoundRect(int32(x), int32(y), int32(w), int32(h), int32(rad))
 }
 
 func ConvPolygonPoints(points []sdl.Point, dx, dy int16) ([]int16, []int16) {
@@ -182,6 +257,10 @@ func (c *Canvas) DrawPolygon(vx, vy []int16) {
 	} else if c.line {
 		sdlgfx.PolygonColor(c.renderer, vx, vy, c.lineColor)
 	}
+}
+
+func (c *Canvas) DrawPolygonS(ps geom.Polygon) {
+	c.DrawPolygon(ConvPolygonPoints(ps.LinePoints(), -1, -1))
 }
 
 func (c *Canvas) Done() (err error) {
