@@ -21,6 +21,12 @@ type Manager struct {
 
 func (m *Manager) Register(handler ...interface{}) {
 	for _, h := range handler {
+		m.h.register(h)
+	}
+}
+
+func (m *Manager) MustRegister(handler ...interface{}) {
+	for _, h := range handler {
 		if m.h.register(h) == 0 {
 			// todo: panic using log
 			panic(fmt.Sprintf("sdlkit event.Manager:\n\tcannot register `%T` as it does not have any event handlers methods that match\n\tmake sure the handler is of the correct type (eg. is a pointer to the type)", h))
