@@ -10,17 +10,10 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type HitTester interface {
-	// HitTest returns true when the x and y values are within the HitTester.
-	HitTest(x, y float64) bool
-	HitTestXY(xy XYGetter) bool
-}
-
 type Shape interface {
-	XYGetter
+	XY
 	HitTester
 	Area() float64
-	Bounds() AABB
 }
 
 // Ellipse cannot be transformed.
@@ -30,18 +23,12 @@ type Ellipse struct {
 	RadiusX, RadiusY float64
 }
 
-func (e Ellipse) GetX() float64 { return e.X }
-func (e Ellipse) GetY() float64 { return e.Y }
-func (e Ellipse) Area() float64 { return math.Pi * e.RadiusX * e.RadiusY }
+func (e Ellipse) GetX() float64   { return e.X }
+func (e Ellipse) GetY() float64   { return e.Y }
+func (e *Ellipse) SetX(x float64) { e.X = x }
+func (e *Ellipse) SetY(y float64) { e.Y = y }
 
-func (e Ellipse) Bounds() AABB {
-	return AABB{
-		X: e.X - e.RadiusX,
-		Y: e.Y - e.RadiusY,
-		W: e.RadiusX * 2,
-		H: e.RadiusY * 2,
-	}
-}
+func (e Ellipse) Area() float64 { return math.Pi * e.RadiusX * e.RadiusY }
 
 // HitTest returns true when position [x y] is inside the Ellipse.
 // https://math.stackexchange.com/questions/76457/check-if-a-point-is-within-an-ellipse
@@ -59,18 +46,12 @@ type Circle struct {
 	X, Y, Radius float64
 }
 
-func (c Circle) GetX() float64 { return c.X }
-func (c Circle) GetY() float64 { return c.Y }
-func (c Circle) Area() float64 { return math.Pi * c.Radius * c.Radius }
+func (c Circle) GetX() float64   { return c.X }
+func (c Circle) GetY() float64   { return c.Y }
+func (c *Circle) SetX(x float64) { c.X = x }
+func (c *Circle) SetY(y float64) { c.Y = y }
 
-func (c Circle) Bounds() AABB {
-	return AABB{
-		X: c.X - c.Radius,
-		Y: c.Y - c.Radius,
-		W: c.Radius * 2,
-		H: c.Radius * 2,
-	}
-}
+func (c Circle) Area() float64 { return math.Pi * c.Radius * c.Radius }
 
 // HitTest returns true when position [x y] is inside the Circle. It calculates
 // the squared distance between [x y] and the Circle's center X Y and compares
@@ -86,25 +67,19 @@ func (c Circle) HitTestXY(xy XYGetter) bool { return c.HitTest(xy.GetX(), xy.Get
 // A Rect is an axis-aligned rectangle where X Y is its center point. It cannot
 // be transformed using a Transform or Matrix. It can however change position
 // and change its width and height.
-// Use NewQuad instead to create a four-sided Polygon if you need a rectangular
+// Use NewQuad instead to create a four-sided polygon if you need a rectangular
 // shape that needs to be rotated, sheared or transformed in any other way.
 type Rect struct {
 	X, Y, // center point
 	W, H float64
 }
 
-func (r Rect) GetX() float64 { return r.X }
-func (r Rect) GetY() float64 { return r.Y }
-func (r Rect) Area() float64 { return r.W * r.H }
+func (r Rect) GetX() float64   { return r.X }
+func (r Rect) GetY() float64   { return r.Y }
+func (r *Rect) SetX(x float64) { r.X = x }
+func (r *Rect) SetY(y float64) { r.Y = y }
 
-func (r Rect) Bounds() AABB {
-	return AABB{
-		X: r.X - r.W/2,
-		Y: r.Y - r.H/2,
-		W: r.W,
-		H: r.H,
-	}
-}
+func (r Rect) Area() float64 { return r.W * r.H }
 
 func (r Rect) Rect() *sdl.Rect {
 	return &sdl.Rect{
@@ -123,32 +98,3 @@ func (r Rect) HitTest(x, y float64) bool {
 
 // HitTestXY returns true when the position of the XYGetter is inside Rect.
 func (r Rect) HitTestXY(xy XYGetter) bool { return r.HitTest(xy.GetX(), xy.GetY()) }
-
-// AABB is an axis-aligned bounding box with X and Y indicating its top left
-// corner.
-type AABB struct {
-	X, Y, // top left
-	W, H float64
-	// https://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/geom/Rectangle.html#methodSummary
-}
-
-func (b AABB) GetX() float64 { return b.X }
-func (b AABB) GetY() float64 { return b.Y }
-
-func (b AABB) Rect() *sdl.Rect {
-	return &sdl.Rect{X: int32(b.X), Y: int32(b.Y), W: int32(b.W), H: int32(b.H)}
-}
-
-// HitTest returns true when the x and y values are within the AABB.
-func (b AABB) HitTest(x, y float64) bool {
-	return hitTestRect(x, y, b.X, b.Y, b.W, b.H)
-}
-
-// HitTestXY returns true when the position of the XYGetter is inside AABB.
-func (b AABB) HitTestXY(xy XYGetter) bool {
-	return hitTestRect(xy.GetX(), xy.GetY(), b.X, b.Y, b.W, b.H)
-}
-
-func hitTestRect(x, y, rX, rY, rW, rH float64) bool {
-	return (x >= rX) && (x < rX+rW) && (y >= rY) && (y < rY+rH)
-}
