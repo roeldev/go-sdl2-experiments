@@ -25,8 +25,9 @@ SDL2 toolkit for Go
 
 
 Package `sdlkit` contains basic building blocks when using `SDL2` with go. It
-uses `github.com/veandco/go-sdl2` at its base and builds upon it. This package is not a game or
-physics engine.
+uses `github.com/veandco/go-sdl2` at its base and builds upon it. This package is not necessarily a
+game or physics engine, but does provide enough common structs and functions to easily make your
+ideas become a reality.
 
 ```sh
 go get github.com/go-pogo/sdlkit
