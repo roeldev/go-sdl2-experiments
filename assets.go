@@ -19,8 +19,8 @@ type AssetsLoader struct {
 	fs  fs.ReadFileFS
 	ren *sdl.Renderer
 
-	// Surfaces
-	Textures *TexturesMap
+	// Surfaces SurfacesMap
+	Textures TexturesMap
 	Fonts    *FontsMap
 }
 
@@ -77,18 +77,18 @@ func (l *AssetsLoader) Texture(file string) (*sdl.Texture, error) {
 		return nil, errors.Trace(err)
 	}
 	if l.Textures != nil {
-		l.Textures.Add(file, tx)
+		l.Textures[file] = tx
 	}
 	return tx, nil
 }
 
-func (l *AssetsLoader) TextureAtlas(file string, subs map[string]sdl.Rect) (*TextureAtlas, error) {
+func (l *AssetsLoader) TextureAtlas(file string, locations map[string]sdl.Rect) (*TextureAtlas, error) {
 	tx, err := l.Texture(file)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	return NewTextureAtlas(tx, subs), nil
+	return NewTextureAtlas(tx, locations), nil
 }
 
 func (l *AssetsLoader) TextureAtlasXml(file string) (*TextureAtlas, error) {
@@ -112,12 +112,12 @@ func (l *AssetsLoader) TextureAtlasXml(file string) (*TextureAtlas, error) {
 		return nil, errors.Trace(err)
 	}
 
-	subs := make(map[string]sdl.Rect, len(x.Subs))
+	locs := make(map[string]sdl.Rect, len(x.Subs))
 	for _, sub := range x.Subs {
-		subs[sub.Name] = sdl.Rect{X: sub.X, Y: sub.Y, W: sub.W, H: sub.H}
+		locs[sub.Name] = sdl.Rect{X: sub.X, Y: sub.Y, W: sub.W, H: sub.H}
 	}
 
-	a, err := l.TextureAtlas(path.Join(path.Dir(file), x.File), subs)
+	a, err := l.TextureAtlas(path.Join(path.Dir(file), x.File), locs)
 	return a, errors.Trace(err)
 }
 
