@@ -28,7 +28,7 @@ const (
 	ToBottomRight
 )
 
-func XY(to Alignment, x, y *float64, rX, rY, rW, rH float64) {
+func Values(to Alignment, x, y *float64, rX, rY, rW, rH float64) {
 	// x pos
 	switch to {
 	case ToCenter:
@@ -86,10 +86,17 @@ func XY(to Alignment, x, y *float64, rX, rY, rW, rH float64) {
 	}
 }
 
-func Point(to Alignment, point *geom.Point, rX, rY, rW, rH float64) {
-	XY(to, &point.X, &point.Y, rX, rY, rW, rH)
+func Point(to Alignment, pt *geom.Point, rX, rY, rW, rH float64) {
+	Values(to, &pt.X, &pt.Y, rX, rY, rW, rH)
 }
 
-func PointInSdlRect(pos Alignment, pt *geom.Point, r sdl.Rect) {
-	Point(pos, pt, float64(r.X), float64(r.Y), float64(r.W), float64(r.H))
+func PointInSdlRect(to Alignment, pt *geom.Point, r sdl.Rect) {
+	Values(to, &pt.X, &pt.Y, float64(r.X), float64(r.Y), float64(r.W), float64(r.H))
+}
+
+func XYInSdlRect(to Alignment, xy geom.XYSetter, r sdl.Rect) {
+	var x, y float64
+	Values(to, &x, &y, float64(r.X), float64(r.Y), float64(r.W), float64(r.H))
+	xy.SetX(x)
+	xy.SetY(y)
 }
