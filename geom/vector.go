@@ -121,10 +121,11 @@ func (v *Vector) Limit(length float64) *Vector {
 
 // Rotate this Vector by an angle amount (in radians).
 func (v *Vector) Rotate(angle float64) *Vector {
-	cos := math.Cos(angle)
-	sin := math.Sin(angle)
-	v.X = (cos * v.X) - (sin * v.Y)
-	v.Y = (sin * v.X) - (cos * v.Y)
+	x, y := v.X, v.Y
+	cos, sin := math.Cos(angle), math.Sin(angle)
+
+	v.X = (x * cos) - (y * sin)
+	v.Y = (y * cos) - (x * sin)
 	return v
 }
 
