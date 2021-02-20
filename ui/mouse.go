@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sdlkit
+package ui
 
 import (
+	"sync"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -22,12 +24,14 @@ const (
 )
 
 type MouseState struct {
-	X, Y      float64
-	BtnLeft   *MouseBtnState
-	BtnRight  *MouseBtnState
-	BtnMiddle *MouseBtnState
-	BtnX1     *MouseBtnState
-	BtnX2     *MouseBtnState
+	X, Y float64
+	BtnLeft,
+	BtnRight,
+	BtnMiddle,
+	BtnX1,
+	BtnX2 *MouseBtnState
+
+	mutex sync.RWMutex
 }
 
 func NewMouseState(trackBtns TrackMouseBtnState) *MouseState {
@@ -50,8 +54,21 @@ func NewMouseState(trackBtns TrackMouseBtnState) *MouseState {
 	return ms
 }
 
-func (ms *MouseState) GetX() float64 { return ms.X }
-func (ms *MouseState) GetY() float64 { return ms.Y }
+func (ms *MouseState) Locker() *sync.RWMutex { return &ms.mutex }
+
+func (ms *MouseState) GetX() float64 {
+	ms.mutex.RLock()
+	res := ms.X
+	ms.mutex.RUnlock()
+	return res
+}
+
+func (ms *MouseState) GetY() float64 {
+	ms.mutex.RLock()
+	res := ms.Y
+	ms.mutex.RUnlock()
+	return res
+}
 
 func (ms *MouseState) HandleMouseButtonEvent(e *sdl.MouseButtonEvent) error {
 	switch e.Button {
@@ -80,8 +97,10 @@ func (ms *MouseState) HandleMouseButtonEvent(e *sdl.MouseButtonEvent) error {
 }
 
 func (ms *MouseState) HandleMouseMotionEvent(e *sdl.MouseMotionEvent) error {
+	ms.mutex.Lock()
 	ms.X = float64(e.X)
 	ms.Y = float64(e.Y)
+	ms.mutex.Unlock()
 	return nil
 }
 
@@ -97,22 +116,41 @@ type MouseBtnState struct {
 	// - sdl.BUTTON_RIGHT
 	// - sdl.BUTTON_X1
 	// - sdl.BUTTON_X2
-	btn uint8
+	btn   uint8
+	mutex sync.RWMutex
 }
 
-func (btn *MouseBtnState) GetX() float64 { return btn.X }
-func (btn *MouseBtnState) GetY() float64 { return btn.Y }
+func (btn *MouseBtnState) Locker() *sync.RWMutex { return &btn.mutex }
+
+func (btn *MouseBtnState) GetX() float64 {
+	btn.mutex.RLock()
+	res := btn.X
+	btn.mutex.RUnlock()
+	return res
+}
+func (btn *MouseBtnState) GetY() float64 {
+	btn.mutex.RLock()
+	res := btn.Y
+	btn.mutex.RUnlock()
+	return res
+}
 
 func (btn *MouseBtnState) updateMouseBtnState(e *sdl.MouseButtonEvent) {
+	btn.mutex.Lock()
 	btn.X = float64(e.X)
 	btn.Y = float64(e.Y)
 	btn.Pressed = e.State == sdl.PRESSED
 	btn.Released = !btn.Pressed
 	btn.Clicks = e.Clicks
+	btn.mutex.Unlock()
 }
 
 func (btn *MouseBtnState) HandleMouseButtonEvent(e *sdl.MouseButtonEvent) error {
-	if e.Button == btn.btn {
+	btn.mutex.RLock()
+	ok := e.Button == btn.btn
+	btn.mutex.RUnlock()
+
+	if ok {
 		btn.updateMouseBtnState(e)
 	}
 	return nil
