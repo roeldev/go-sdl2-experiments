@@ -112,23 +112,32 @@ func (em *Manager) Components(tag ComponentTag) []interface{} {
 }
 
 func (em *Manager) addComponent(id EntityId, tag ComponentTag, comp interface{}) {
+	tags := make(map[ComponentTag]*components)
 	em.mutex.RLock()
-	cc, ok := em.components[tag]
+	for _, ct := range tag.Flags() {
+		tags[ct] = em.components[ct]
+	}
 	em.mutex.RUnlock()
 
-	if !ok {
-		cc = &components{
-			list: make(map[EntityId]interface{}, len(em.entities)),
+	newTags := make([]ComponentTag, 0, len(tags))
+	for ct, cc := range tags {
+		if nil == cc {
+			newTags = append(newTags, ct)
+			tags[ct] = &components{
+				list: map[EntityId]interface{}{id: comp},
+			}
+		} else {
+			cc.Lock()
+			cc.list[id] = comp
+			cc.Unlock()
 		}
-
-		em.mutex.Lock()
-		em.components[tag] = cc
-		em.mutex.Unlock()
 	}
 
-	cc.Lock()
-	cc.list[id] = comp
-	cc.Unlock()
+	em.mutex.Lock()
+	for _, ct := range newTags {
+		em.components[ct] = tags[ct]
+	}
+	em.mutex.Unlock()
 }
 
 func (em *Manager) getComponent(id EntityId, tag ComponentTag) interface{} {

@@ -8,13 +8,13 @@ import (
 	"sync/atomic"
 )
 
+type EntityId uint32
+
 var eId uint32
 
 func getEntityId() EntityId {
 	return EntityId(atomic.AddUint32(&eId, 1))
 }
-
-type EntityId uint32
 
 type Entity interface {
 	Container
