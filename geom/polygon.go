@@ -6,9 +6,13 @@ package geom
 
 import (
 	"math"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
+
+type PolygonShape interface {
+	Shape
+	Model() []Point
+	Vertices() []Point
+}
 
 // https://en.wikipedia.org/wiki/Simple_polygon
 // https://en.wikipedia.org/wiki/Polygon
@@ -16,11 +20,10 @@ type Polygon struct {
 	// X and Y indicate the absolute position of the Polygon.
 	X, Y float64
 
-	origin Point       // origin point relative to position.
-	len    int         // number of edges
-	model  []Point     // original points relative to pos
-	actual []Point     // actual points relative to pos
-	lines  []sdl.Point // points of lines to draw
+	origin Point   // origin point relative to position.
+	len    int     // number of edges
+	model  []Point // original points relative to pos
+	actual []Point // actual points relative to pos
 }
 
 func NewPolygon(x, y float64, pts []Point) *Polygon {
@@ -31,22 +34,21 @@ func NewPolygon(x, y float64, pts []Point) *Polygon {
 		len:    n,
 		model:  pts,
 		actual: make([]Point, n),
-		lines:  make([]sdl.Point, n+1),
 	}
 	p.Transform(IdentityMatrix())
 	return p
 }
 
-// NewRegularPolygon creates a new regular Polygon where all angles are equal
+// NewRegularPolygon creates a new regular polygon where all angles are equal
 // in measure and all sides have the same length. Value cr is the circumradius
-// between the center of the Polygon and any edge point. Value n indicates the
-// amount of edges the Polygon has, 3 for a triangle, 4 for a quad etc., and
-// cannot be lower than 3.
+// between the center of the Polygon and any vertex (edge point). Value n
+// indicates the amount of vertices (edges) the polygon has, 3 for a triangle,
+// 4 for a quad etc. This value cannot be lower than 3.
 // See https://en.wikipedia.org/wiki/Regular_polygon for additional information
 // about regular polygons.
-func NewRegularPolygon(x, y, cr float64, n uint8) *Polygon {
+func NewRegularPolygon(x, y float64, cr float64, n uint8) *Polygon {
 	if n < 3 {
-		panic("geom: cannot create regular polygon with less than 3 sides")
+		panic("geom: cannot create regular Polygon with less than 3 sides")
 	}
 
 	angle := float64(n-2) * 180 / float64(n)
@@ -90,7 +92,7 @@ func NewTrigon(x, y, w, h float64) *Polygon {
 	return t
 }
 
-// NewQuad creates a new Polygon where all angles are 90 degrees. It differs
+// NewQuad creates a new polygon where all angles are 90 degrees. It differs
 // from a Rect in the fact it can be rotated, scaled and skewed using a
 // Matrix.
 func NewQuad(x, y, w, h float64) *Polygon {
@@ -105,9 +107,18 @@ func NewQuad(x, y, w, h float64) *Polygon {
 
 func (p *Polygon) GetX() float64  { return p.X }
 func (p *Polygon) GetY() float64  { return p.Y }
+func (p *Polygon) SetX(x float64) { p.X = x }
+func (p *Polygon) SetY(y float64) { p.Y = y }
+
 func (p *Polygon) Origin() *Point { return &p.origin }
+
+func (p *Polygon) AbsoluteOrigin() Point {
+	return Point{X: p.GetX() + p.origin.X, Y: p.GetY() + p.origin.Y}
+}
+
 func (p *Polygon) Model() []Point { return p.model }
 
+// https://www.wikihow.com/Calculate-the-Area-of-a-Polygon
 func (p *Polygon) Area() float64 {
 	var res float64
 	var p1, p2 Point
@@ -127,31 +138,8 @@ func (p *Polygon) Area() float64 {
 	return math.Abs(res) / 2
 }
 
-func (p *Polygon) Bounds() AABB {
-	bounds := AABB{
-		X: math.MaxFloat64,
-		Y: math.MaxFloat64,
-		W: math.SmallestNonzeroFloat64,
-		H: math.SmallestNonzeroFloat64,
-	}
-	for _, pt := range p.actual {
-		bounds.X = math.Min(bounds.X, pt.X)
-		bounds.Y = math.Min(bounds.Y, pt.Y)
-		bounds.W = math.Max(bounds.W, pt.X)
-		bounds.H = math.Max(bounds.H, pt.Y)
-	}
-
-	// convert max x/y to width and height
-	bounds.W -= bounds.X
-	bounds.H -= bounds.Y
-
-	// min x/y are still relative to x/y of the polygon, fix this
-	bounds.X += p.X
-	bounds.Y += p.Y
-	return bounds
-}
-
-func (p *Polygon) Edges() []Point {
+// Vertices returns the edges (vertices or vertexes) of the Polygon.
+func (p *Polygon) Vertices() []Point {
 	res := make([]Point, p.len)
 	for i, pt := range p.actual {
 		res[i].X = pt.X + p.X
@@ -160,14 +148,8 @@ func (p *Polygon) Edges() []Point {
 	return res
 }
 
-func (p *Polygon) LinePoints() []sdl.Point { return p.lines }
-
 // https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html
 func (p *Polygon) HitTest(x, y float64) bool {
-	if p.len > 5 && !p.Bounds().HitTest(x, y) {
-		return false
-	}
-
 	var c bool
 	for i, j := 0, p.len-1; i < p.len; i++ {
 		p1, p2 := p.actual[i], p.actual[j]
@@ -190,10 +172,5 @@ func (p *Polygon) Transform(matrix Matrix) {
 
 		p.actual[i].X = ax
 		p.actual[i].Y = ay
-		p.lines[i].X = int32(ax + p.X)
-		p.lines[i].Y = int32(ay + p.Y)
 	}
-
-	// close draw loop with first point
-	p.lines[p.len] = p.lines[0]
 }

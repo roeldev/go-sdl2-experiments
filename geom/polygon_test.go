@@ -59,7 +59,7 @@ func TestPolygon_Area(t *testing.T) {
 func TestNewQuad(t *testing.T) {
 	t.Run("size", func(t *testing.T) {
 		want := [2]float64{100, 50}
-		edges := NewQuad(0, 0, want[0], want[1]).Edges()
+		edges := NewQuad(0, 0, want[0], want[1]).Vertices()
 
 		assert.Equal(t, want, [2]float64{
 			math.Abs(edges[0].X - edges[2].X),
