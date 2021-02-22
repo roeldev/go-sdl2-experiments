@@ -5,6 +5,7 @@
 package sdlkit
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -184,3 +185,43 @@ func (f *avgFps) update(elapsed time.Duration) {
 func (f *avgFps) String() string {
 	return fmt.Sprintf("fps: %.2f, high: %.2f, low: %.2f", f.current, f.highest, f.lowest)
 }
+
+type windowTitleFps struct {
+	ctx     context.Context
+	cfn     context.CancelFunc
+	stage   *Stage
+	running bool
+}
+
+func newWindowTitleFps(stage *Stage) *windowTitleFps {
+	return &windowTitleFps{stage: stage}
+}
+
+func (wt *windowTitleFps) run() {
+	wt.ctx, wt.cfn = context.WithCancel(wt.stage.ctx)
+	go func() {
+		if wt.running {
+			return
+		}
+
+		wt.running = true
+		timer := time.NewTicker(time.Second / 2)
+		title := wt.stage.window.GetTitle()
+
+		for {
+			wt.stage.window.SetTitle(title + " | " + wt.stage.time.avgPerSec.String())
+
+			select {
+			case <-timer.C: // wait before we update the title again
+				continue
+
+			case <-wt.ctx.Done():
+				wt.running = false
+				wt.stage.window.SetTitle(title)
+				return
+			}
+		}
+	}()
+}
+
+func (wt *windowTitleFps) stop() { wt.cfn() }

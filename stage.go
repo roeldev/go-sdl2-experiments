@@ -50,15 +50,16 @@ type Options struct {
 	BgColor color.Color // see https://wiki.libsdl.org/SDL_RenderClear
 
 	// timer
-	TargetFps uint8 // todo: DisplayMode.RefreshRate
-	LimitFps  bool
+	TargetFps      uint8 // todo: DisplayMode.RefreshRate
+	LimitFps       bool
+	WindowTitleFps bool
 }
 
 type Stage struct {
-	BgColor        color.RGBA
-	WindowTitleFps bool
+	BgColor color.RGBA
 
-	window   *sdl.Window
+	window *sdl.Window
+	// todo: canvas voor stage? renderer daarin plaatsen?
 	renderer *sdl.Renderer
 	scenes   *SceneManager
 	time     *Time
@@ -72,6 +73,8 @@ type Stage struct {
 	sizeRect sdl.Rect
 	size     [2]float64
 	fsMode   uint32
+
+	windowTitleFps *windowTitleFps
 }
 
 // NewStage creates a new Stage by first creating a new sdl.Window and
@@ -133,6 +136,10 @@ func NewStage(title string, w, h int32, opts Options) (*Stage, error) {
 
 	stage.ctx, stage.cfn = context.WithCancel(opts.Context)
 	stage.time.LimitFps = opts.LimitFps
+
+	if opts.WindowTitleFps {
+		stage.ToggleWindowTitleFps()
+	}
 
 	return stage, err
 }
@@ -226,6 +233,9 @@ func (s *Stage) HandleKeyUpEvent(e *sdl.KeyboardEvent) error {
 	if e.Keysym.Scancode == sdl.SCANCODE_F11 {
 		return s.ToggleFullscreen()
 	}
+	if e.Keysym.Scancode == sdl.SCANCODE_F12 {
+		s.ToggleWindowTitleFps()
+	}
 	return nil
 }
 
@@ -274,6 +284,20 @@ func (s *Stage) ToggleFullscreen() (err error) {
 	}
 
 	return s.window.SetFullscreen(s.fsMode)
+}
+
+func (s *Stage) ToggleWindowTitleFps() {
+	if s.windowTitleFps == nil {
+		s.windowTitleFps = newWindowTitleFps(s)
+		s.windowTitleFps.run()
+		return
+	}
+
+	if s.windowTitleFps.running {
+		s.windowTitleFps.stop()
+	} else {
+		s.windowTitleFps.run()
+	}
 }
 
 func (s *Stage) Destroy() {
