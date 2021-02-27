@@ -15,26 +15,34 @@ import (
 	"github.com/go-pogo/sdlkit"
 )
 
+type Provider interface {
+	RegisterEvents(em *Manager)
+}
+
 type Manager struct {
 	h handlers
 }
 
-func (m *Manager) Register(handler ...interface{}) {
-	for _, h := range handler {
-		m.h.register(h)
-	}
-}
+func (m *Manager) RegisterHandler(handler ...interface{}) { m.register(handler, false) }
 
-func (m *Manager) MustRegister(handler ...interface{}) {
-	for _, h := range handler {
-		if m.h.register(h) == 0 {
+func (m *Manager) MustRegisterHandler(handler ...interface{}) { m.register(handler, true) }
+
+func (m *Manager) register(handlers []interface{}, mustRegister bool) {
+	for _, handler := range handlers {
+		if handler == nil {
+			continue
+		}
+
+		if p, ok := handler.(Provider); ok {
+			p.RegisterEvents(m)
+		} else if m.h.register(handler) == 0 && mustRegister {
 			// todo: panic using log
-			panic(fmt.Sprintf("sdlkit event.Manager:\n\tcannot register `%T` as it does not have any event handlers methods that match\n\tmake sure the handler is of the correct type (eg. is a pointer to the type)", h))
+			panic(fmt.Sprintf("sdlkit event.Manager:\n\tcannot register `%T` as it does not have any event handlers methods that match\n\tmake sure the handler is of the correct type (eg. is a pointer to the type)", handler))
 		}
 	}
 }
 
-func (m *Manager) Handle(event sdl.Event) (err error) {
+func (m *Manager) HandleEvent(event sdl.Event) (err error) {
 	if _, ok := event.(*sdl.QuitEvent); ok {
 		return sdlkit.QUIT
 	}
@@ -42,7 +50,7 @@ func (m *Manager) Handle(event sdl.Event) (err error) {
 	return m.h.handle(event)
 }
 
-func (m *Manager) Loop() error {
+func (m *Manager) Process() error {
 	var event sdl.Event
 	for {
 		event = sdl.PollEvent()
@@ -50,7 +58,7 @@ func (m *Manager) Loop() error {
 			return nil
 		}
 
-		if err := m.Handle(event); err != nil {
+		if err := m.HandleEvent(event); err != nil {
 			return err
 		}
 	}
