@@ -6,6 +6,11 @@
 
 package sdlkit
 
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 func init() {
 	DefaultOptions.WindowTitleFps = true
+	DefaultOptions.RendererFlags &^= sdl.RENDERER_PRESENTVSYNC
 }

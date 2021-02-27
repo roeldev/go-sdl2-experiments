@@ -22,7 +22,7 @@ var DefaultOptions = Options{
 
 	// renderer options
 	RendererIndex: -1,
-	RendererFlags: sdl.RENDERER_ACCELERATED,
+	RendererFlags: sdl.RENDERER_ACCELERATED | sdl.RENDERER_PRESENTVSYNC,
 	BgColor:       color.RGBA{},
 
 	// timer options
