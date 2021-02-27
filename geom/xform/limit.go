@@ -11,13 +11,13 @@ import (
 )
 
 var NoLimits = Limits{
-	Rotation:   Limit{math.SmallestNonzeroFloat64, math.MaxFloat64},
+	Rotation:   Limit{-math.MaxFloat64, math.MaxFloat64},
 	ScaleX:     Limit{0, math.MaxFloat64},
 	ScaleY:     Limit{0, math.MaxFloat64},
-	SkewX:      Limit{math.SmallestNonzeroFloat64, math.MaxFloat64},
-	SkewY:      Limit{math.SmallestNonzeroFloat64, math.MaxFloat64},
-	TranslateX: Limit{math.SmallestNonzeroFloat64, math.MaxFloat64},
-	TranslateY: Limit{math.SmallestNonzeroFloat64, math.MaxFloat64},
+	SkewX:      Limit{-math.MaxFloat64, math.MaxFloat64},
+	SkewY:      Limit{-math.MaxFloat64, math.MaxFloat64},
+	TranslateX: Limit{-math.MaxFloat64, math.MaxFloat64},
+	TranslateY: Limit{-math.MaxFloat64, math.MaxFloat64},
 }
 
 func WithLimits(t *Transformer, limits Limits) *Transformer {
