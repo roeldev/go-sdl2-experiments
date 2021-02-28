@@ -31,26 +31,18 @@ func (p *Point) SetY(y float64) { p.Y = y }
 // Vector returns a Vector with the same X and Y values as Point.
 func (p Point) Vector() Vector { return Vector{X: p.X, Y: p.Y} }
 
-// HitTest returns a boolean indicating whether the X and Y values of Point are
-// within the target HitTester.
-func (p Point) HitTest(target HitTester) bool {
-	return target.HitTest(p.X, p.Y)
-}
-
 // InRect returns a bool indicating whether the X and Y values of Point are
 // within the sdl.Rect.
 func (p Point) InRect(r sdl.Rect) bool {
-	return hitTestRect(p.X, p.Y,
-		float64(r.X), float64(r.Y),
-		float64(r.W), float64(r.H),
-	)
+	rX, rY := float64(r.X), float64(r.Y)
+	return (p.X >= rX) && (p.X < rX+float64(r.W)) &&
+		(p.Y >= rY) && (p.Y < rY+float64(r.H))
 }
 
 // InFRect returns a bool indicating whether the X and Y values of Point are
 // within the sdl.FRect.
 func (p Point) InFRect(r sdl.FRect) bool {
-	return hitTestRect(p.X, p.Y,
-		float64(r.X), float64(r.Y),
-		float64(r.W), float64(r.H),
-	)
+	rX, rY := float64(r.X), float64(r.Y)
+	return (p.X >= rX) && (p.X < rX+float64(r.W)) &&
+		(p.Y >= rY) && (p.Y < rY+float64(r.H))
 }

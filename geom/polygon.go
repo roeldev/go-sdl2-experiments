@@ -148,23 +148,6 @@ func (p *Polygon) Vertices() []Point {
 	return res
 }
 
-// https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html
-func (p *Polygon) HitTest(x, y float64) bool {
-	var c bool
-	for i, j := 0, p.len-1; i < p.len; i++ {
-		p1, p2 := p.actual[i], p.actual[j]
-		if ((p1.Y+p.Y > y) != (p2.Y+p.Y > y)) &&
-			(x < ((p2.X-p1.X)*(y-p1.Y-p.Y))/(p2.Y-p1.Y)+p1.X+p.X) {
-			c = !c
-		}
-		j = i
-	}
-
-	return c
-}
-
-func (p *Polygon) HitTestXY(xy XYGetter) bool { return p.HitTest(xy.GetX(), xy.GetY()) }
-
 func (p *Polygon) Transform(matrix Matrix) {
 	for i, pt := range p.model {
 		ax := ((pt.X + p.origin.X) * matrix[ME_A]) + ((pt.Y + p.origin.Y) * matrix[ME_C]) + matrix[ME_TX]
