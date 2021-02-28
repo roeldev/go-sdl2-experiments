@@ -19,6 +19,10 @@ type TextureClip struct {
 	Location sdl.Rect
 }
 
+func (tc TextureClip) Size() (float64, float64) {
+	return float64(tc.Location.W), float64(tc.Location.H)
+}
+
 type TextureAtlas struct {
 	texture   *sdl.Texture
 	locations []sdl.Rect
