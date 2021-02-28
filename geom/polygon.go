@@ -6,6 +6,8 @@ package geom
 
 import (
 	"math"
+
+	math2 "github.com/go-pogo/sdlkit/math"
 )
 
 type PolygonShape interface {
@@ -24,6 +26,7 @@ type Polygon struct {
 	len    int     // number of edges
 	model  []Point // original points relative to pos
 	actual []Point // actual points relative to pos
+	area   float64
 }
 
 func NewPolygon(x, y float64, pts []Point) *Polygon {
@@ -56,7 +59,7 @@ func NewRegularPolygon(x, y float64, cr float64, n uint8) *Polygon {
 
 	var i uint8
 	for ; i < n; i++ {
-		rad := DegToRad(360 - (180-angle)*float64(i))
+		rad := math2.DegToRad(360 - (180-angle)*float64(i))
 		points[i].X = math.Cos(rad) * cr
 		points[i].Y = math.Sin(rad) * cr
 	}
@@ -120,6 +123,10 @@ func (p *Polygon) Model() []Point { return p.model }
 
 // https://www.wikihow.com/Calculate-the-Area-of-a-Polygon
 func (p *Polygon) Area() float64 {
+	if p.area != 0 {
+		return p.area
+	}
+
 	var res float64
 	var p1, p2 Point
 
@@ -135,7 +142,8 @@ func (p *Polygon) Area() float64 {
 		res += (p1.X * p2.Y) - (p1.Y * p2.X)
 	}
 
-	return math.Abs(res) / 2
+	p.area = math.Abs(res) / 2
+	return p.area
 }
 
 // Vertices returns the edges (vertices or vertexes) of the Polygon.
@@ -149,6 +157,7 @@ func (p *Polygon) Vertices() []Point {
 }
 
 func (p *Polygon) Transform(matrix Matrix) {
+	p.area = 0
 	for i, pt := range p.model {
 		ax := ((pt.X + p.origin.X) * matrix[ME_A]) + ((pt.Y + p.origin.Y) * matrix[ME_C]) + matrix[ME_TX]
 		ay := ((pt.X + p.origin.X) * matrix[ME_B]) + ((pt.Y + p.origin.Y) * matrix[ME_D]) + matrix[ME_TY]
@@ -156,4 +165,13 @@ func (p *Polygon) Transform(matrix Matrix) {
 		p.actual[i].X = ax
 		p.actual[i].Y = ay
 	}
+}
+
+func Centroid(points ...[2]float64) (x, y float64) {
+	for _, p := range points {
+		x += p[0]
+		y += p[1]
+	}
+	n := float64(len(points))
+	return x / n, y / n
 }

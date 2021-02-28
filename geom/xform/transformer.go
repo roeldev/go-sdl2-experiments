@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/go-pogo/sdlkit/geom"
+	"github.com/go-pogo/sdlkit/math"
 )
 
 type Transformer struct {
@@ -44,7 +45,7 @@ func (t *Transformer) setRotation(radians float64) {
 }
 
 func (t *Transformer) SetRotationDeg(degrees float64) *Transformer {
-	return t.SetRotation(degrees * geom.D2R)
+	return t.SetRotation(degrees * math.D2R)
 }
 
 // Rotate adds the given radians to the rotation transformation.
@@ -54,7 +55,7 @@ func (t *Transformer) Rotate(radians float64) *Transformer {
 
 // RotateDeg adds the given degrees to the rotation transformation.
 func (t *Transformer) RotateDeg(degrees float64) *Transformer {
-	return t.SetRotation(t.target.Rotation + (degrees * geom.D2R))
+	return t.SetRotation(t.target.Rotation + (degrees * math.D2R))
 }
 
 func (t *Transformer) setScaleX(scale float64) {

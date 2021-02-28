@@ -8,6 +8,21 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+type XYGetter interface {
+	GetX() float64
+	GetY() float64
+}
+
+type XYSetter interface {
+	SetX(x float64)
+	SetY(y float64)
+}
+
+type XY interface {
+	XYGetter
+	XYSetter
+}
+
 type Point struct {
 	X, Y float64
 }
