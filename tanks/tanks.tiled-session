@@ -1,0 +1,46 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "tanks.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "tanks.tmx": {
+            "scale": 0.642734375,
+            "selectedLayer": -1,
+            "viewCenter": {
+                "x": 576.4434180138569,
+                "y": 640.2333779020299
+            }
+        },
+        "terrain.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "P:/go-pogo/sdlkit/.sdlkit-examples/tanks/assets",
+    "map.height": 10,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 128,
+    "map.tileWidth": 128,
+    "map.width": 10,
+    "openFiles": [
+        "terrain.tsx",
+        "tanks.tmx"
+    ],
+    "project": "tanks.tiled-project",
+    "property.type": "object",
+    "recentFiles": [
+        "terrain.tsx",
+        "tanks.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 128,
+        "width": 128
+    },
+    "tileset.type": 0
+}
