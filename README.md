@@ -1,61 +1,12 @@
-SDL2 toolkit for Go
-===================
-[![Latest release][latest-release-img]][latest-release-url]
-[![Build status][build-status-img]][build-status-url]
-[![Go Report Card][report-img]][report-url]
-[![Documentation][doc-img]][doc-url]
+SDL2 toolkit for Go examples
+============================
+This repository contains several examples, ranging from very basic to a little more advanced. It is
+meant to showcase the possibilities of
+package [`github.com/veandco/go-sdl2`](https://github.com/veandco/go-sdl2) combined
+with [`github.com/roeldev/go-sdl2-experiments/pkg/sdlkit`](https://github.com/roeldev/go-sdl2-experiments/pkg/sdlkit).
 
-[latest-release-img]: https://img.shields.io/github/release/roeldev/go-sdl2-kit.svg?label=latest
-
-[latest-release-url]: https://github.com/go-pogo/sdlkit/releases
-
-[build-status-img]: https://github.com/go-pogo/sdlkit/workflows/Go/badge.svg
-
-[build-status-url]: https://github.com/go-pogo/sdlkit/actions?query=workflow%3ATest
-
-[report-img]: https://goreportcard.com/badge/github.com/go-pogo/sdlkit
-
-[report-url]: https://goreportcard.com/report/github.com/go-pogo/sdlkit
-
-[doc-img]: https://godoc.org/github.com/go-pogo/sdlkit?status.svg
-
-[doc-url]: https://pkg.go.dev/github.com/go-pogo/sdlkit
-
-[examples-url]: https://github.com/go-pogo/sdlkit-examples
-
-
-Package `sdlkit` contains basic building blocks when using `SDL2` with go. It
-uses `github.com/veandco/go-sdl2` at its base and builds upon it. This package is not necessarily a
-game or physics engine, but does provide enough common structs and functions to easily make your
-ideas become a reality.
-
-```sh
-go get github.com/go-pogo/sdlkit
-```
-
-```go
-import "github.com/go-pogo/sdlkit"
-```
-
-## SDL2 installation on Windows
-
-- install a gcc compiler (for example `tdm-gcc`
-  from [https://jmeubank.github.io/tdm-gcc/download/](https://jmeubank.github.io/tdm-gcc/download/))
-- make sure all gcc related executables are available through your PATH environment variable, test
-  this by running `gcc -v`
-- run `go get -v github.com/veandco/go-sdl2/sdl@master`
-- run `go mod vendor` to create/sync vendor directory
-- run `git submodule add https://github.com/veandco/go-sdl2-libs.git .go-sdl2-libs`
-- copy/symlink `.go-sdl2-libs`
-  to `vendor/github.com/veandco/go-sdl12/.go-sdl2-libs`
-- build/run your project with the `-tags static` build flag
-- optionally add the `-v -x` build flags to output the files that are compiled
-
-## Documentation
-Additional detailed documentation is available at [pkg.go.dev][doc-url]
-
-## Examples
-Several examples can be found at [https://github.com/go-pogo/sdlkit-examples][examples-url].
+Some examples are heavily inspired by the works, or contain art or other assets created by others.
+These examples contain a notice and location of the original works/assets.
 
 ## Created with
 <a href="https://www.jetbrains.com/?from=roeldev" target="_blank"><img src="https://pbs.twimg.com/profile_images/1206615658638856192/eiS7UWLo_400x400.jpg" width="35" /></a>
