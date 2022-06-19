@@ -1,4 +1,4 @@
 .idea
-.sdlkit-examples
+.go-sdl2-libs
 vendor/
 *.exe
