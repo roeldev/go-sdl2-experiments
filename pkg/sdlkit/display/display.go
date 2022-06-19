@@ -3,3 +3,13 @@
 // license that can be found in the LICENSE file.
 
 package display
+
+import (
+	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit"
+	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/geom"
+)
+
+type Display interface {
+	sdlkit.Renderable
+	Position() *geom.Point
+}

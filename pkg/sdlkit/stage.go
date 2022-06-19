@@ -58,12 +58,12 @@ type Options struct {
 type Stage struct {
 	BgColor color.RGBA
 
-	window *sdl.Window
-	// todo: canvas voor stage? renderer daarin plaatsen?
+	window   *sdl.Window
 	renderer *sdl.Renderer
+	canvas   *Canvas
 	scenes   *SceneManager
 	time     *Time
-	clock    *Clock
+	// clock    *Clock
 
 	ctx context.Context
 	cfn context.CancelFunc
@@ -94,9 +94,10 @@ func NewStage(title string, w, h int32, opts Options) (*Stage, error) {
 	stage := &Stage{
 		window:   window,
 		renderer: renderer,
+		canvas:   NewCanvas(renderer),
 		scenes:   NewSceneManager(),
 		time:     NewTime(opts.TargetFps, clock),
-		clock:    clock,
+		// clock:    clock,
 
 		initSize: [2]int32{w, h},
 		fsMode:   opts.FullscreenMode,
@@ -188,16 +189,23 @@ func (s *Stage) FWidth() float64 { return s.size[0] }
 // Height returns the height of the logical size of the Stage as a float64.
 func (s *Stage) FHeight() float64 { return s.size[1] }
 
+func (s *Stage) Center() (float64, float64) {
+	return s.size[0] / 2, s.size[1] / 2
+}
+
 // Window returns the sdl.Window in which the Stage is set.
 func (s *Stage) Window() *sdl.Window { return s.window }
 
 // Renderer returns the sdl.Renderer that's attached to the window.
 func (s *Stage) Renderer() *sdl.Renderer { return s.renderer }
 
+// Canvas returns the Stage's Canvas which enables advanced drawing.
+func (s *Stage) Canvas() *Canvas { return s.canvas }
+
 // Time returns the Time that keeps track of time and framerate.
 func (s *Stage) Time() *Time { return s.time }
 
-func (s *Stage) Clock() *Clock { return s.clock }
+// func (s *Stage) Clock() *Clock { return s.clock }
 
 // SceneManager returns the SceneManager instance that handles switching of
 // scenes for the Stage.
@@ -257,7 +265,6 @@ func (s *Stage) updateSize(w, h int32) error {
 	}
 
 	s.size[0], s.size[1] = float64(s.sizeRect.W), float64(s.sizeRect.H)
-
 	return s.renderer.SetLogicalSize(s.sizeRect.W, s.sizeRect.H)
 }
 

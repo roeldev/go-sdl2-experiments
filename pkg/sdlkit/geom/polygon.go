@@ -22,7 +22,7 @@ type Polygon struct {
 	// X and Y indicate the absolute position of the Polygon.
 	X, Y float64
 
-	origin Point   // origin point relative to position.
+	origin Point   // origin point relative to X and Y.
 	len    int     // number of edges
 	model  []Point // original points relative to pos
 	actual []Point // actual points relative to pos
@@ -116,7 +116,7 @@ func (p *Polygon) SetY(y float64) { p.Y = y }
 func (p *Polygon) Origin() *Point { return &p.origin }
 
 func (p *Polygon) AbsoluteOrigin() Point {
-	return Point{X: p.GetX() + p.origin.X, Y: p.GetY() + p.origin.Y}
+	return Point{X: p.X + p.origin.X, Y: p.Y + p.origin.Y}
 }
 
 func (p *Polygon) Model() []Point { return p.model }

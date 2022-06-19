@@ -34,7 +34,7 @@ func NewFpsDisplay(t *sdlkit.Time, x, y int32) *FpsDisplay {
 	}
 }
 
-func (d *FpsDisplay) Draw(r *sdl.Renderer) (err error) {
+func (d *FpsDisplay) Render(r *sdl.Renderer) (err error) {
 	x, y := d.X, d.Y
 
 	var sx, sy float32

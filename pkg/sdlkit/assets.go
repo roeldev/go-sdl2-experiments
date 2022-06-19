@@ -82,6 +82,15 @@ func (l *AssetsLoader) Texture(file string) (*sdl.Texture, error) {
 	return tx, nil
 }
 
+func (l *AssetsLoader) TextureClip(file string) (tc TextureClip, err error) {
+	tc.Texture, err = l.Texture(file)
+	if err == nil {
+		_, _, tc.Location.W, tc.Location.H, err = tc.Texture.Query()
+	}
+
+	return tc, errors.Trace(err)
+}
+
 func (l *AssetsLoader) TextureAtlas(file string, locations map[string]sdl.Rect) (*TextureAtlas, error) {
 	tx, err := l.Texture(file)
 	if err != nil {

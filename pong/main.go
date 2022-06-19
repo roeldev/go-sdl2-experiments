@@ -7,8 +7,8 @@ package main
 import (
 	"github.com/veandco/go-sdl2/sdl"
 
+	"github.com/roeldev/go-sdl2-experiments/internal"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit"
-	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit-examples/internal"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/colors"
 )
 
@@ -21,7 +21,7 @@ func main() {
 	defer sdl.Quit()
 
 	sdlkit.DefaultOptions.WindowFlags += sdl.WINDOW_RESIZABLE
-	sdlkit.DefaultOptions.BgColor = colors.DarkSlateGray
+	sdlkit.DefaultOptions.BgColor = colors.RgbaColor(colors.DarkSlateGray)
 
 	stage := sdlkit.MustNewStage(internal.ExampleName(), 1024, 576, sdlkit.DefaultOptions)
 	defer stage.Destroy()

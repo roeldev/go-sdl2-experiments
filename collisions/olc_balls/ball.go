@@ -55,7 +55,7 @@ func (b *ball) Prerender(canvas *sdlkit.Canvas) error {
 		return err
 	}
 
-	canvas.AntiAlias(true)
+	canvas.SetDrawAntiAlias(true)
 	canvas.BeginFill(b.Color)
 	canvas.DrawCircle(rad, rad, rad)
 	if err = canvas.Done(); err != nil {

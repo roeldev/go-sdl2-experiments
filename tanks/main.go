@@ -10,10 +10,10 @@ import (
 
 	"github.com/veandco/go-sdl2/sdl"
 
+	examples "github.com/roeldev/go-sdl2-experiments/internal"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit"
-	examples "github.com/roeldev/go-sdl2-experiments/pkg/sdlkit-examples/internal"
-	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit-examples/tanks/internal"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/colors"
+	"github.com/roeldev/go-sdl2-experiments/tanks/internal"
 )
 
 //go:embed "assets"

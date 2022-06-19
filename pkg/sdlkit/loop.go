@@ -26,8 +26,11 @@ func RunLoop(stage *Stage) error {
 			continue
 		}
 
+		// todo: calculate amount of (physics) update we can fit in a frame
+		// for i := 0; i < 20; i++ {
 		// update state of scene
 		scene.Update(dt)
+		// }
 
 		// render to screen
 		if err := stage.ClearScreen(); err != nil {

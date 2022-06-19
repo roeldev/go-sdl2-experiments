@@ -9,39 +9,41 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func Draw(renderer *sdl.Renderer, draw ...Drawable) error {
+type Renderable interface {
+	Render(ren *sdl.Renderer) error
+}
+
+type RenderableFunc func(ren *sdl.Renderer) error
+
+func (fn RenderableFunc) Render(ren *sdl.Renderer) error { return fn(ren) }
+
+func Render(ren *sdl.Renderer, renderables ...Renderable) error {
 	var err error
-	for _, d := range draw {
-		errors.Append(&err, d.Draw(renderer))
+	for _, r := range renderables {
+		errors.Append(&err, r.Render(ren))
 	}
 	return err
 }
 
-type Drawable interface {
-	Draw(r *sdl.Renderer) error
-}
+type Layer []Renderable
 
-type DrawableFunc func(r *sdl.Renderer) error
+func (l *Layer) Clear() { *l = []Renderable(*l)[:0] }
 
-func (d DrawableFunc) Draw(r *sdl.Renderer) error { return d(r) }
+func (l *Layer) Append(d ...Renderable) { *l = append(*l, d...) }
 
-type Layer []Drawable
-
-func (l *Layer) Append(d ...Drawable) { *l = append(*l, d...) }
-
-func (l *Layer) Prepend(d ...Drawable) {
+func (l *Layer) Prepend(d ...Renderable) {
 	if len(*l) == 0 {
 		l.Append(d...)
 		return
 	}
 
-	slice := []Drawable(*l)
+	slice := []Renderable(*l)
 	slice = append(slice, d...)
 	copy(slice[len(d):], slice)
-	for i, d := range d {
-		slice[i] = d
+	for i, drawable := range d {
+		slice[i] = drawable
 	}
 	*l = slice
 }
 
-func (l Layer) Draw(r *sdl.Renderer) error { return Draw(r, l...) }
+func (l Layer) Render(ren *sdl.Renderer) error { return Render(ren, l...) }

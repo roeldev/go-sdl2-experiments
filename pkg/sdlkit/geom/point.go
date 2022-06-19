@@ -8,21 +8,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type XYGetter interface {
-	GetX() float64
-	GetY() float64
-}
-
-type XYSetter interface {
-	SetX(x float64)
-	SetY(y float64)
-}
-
-type XY interface {
-	XYGetter
-	XYSetter
-}
-
 type Point struct {
 	X, Y float64
 }
@@ -45,6 +30,14 @@ func (p *Point) SetY(y float64) { p.Y = y }
 
 // Vector returns a Vector with the same X and Y values as Point.
 func (p Point) Vector() Vector { return Vector{X: p.X, Y: p.Y} }
+
+func (p Point) SdlPoint() sdl.Point {
+	return sdl.Point{X: int32(p.X), Y: int32(p.Y)}
+}
+
+func (p Point) SdlFPoint() sdl.FPoint {
+	return sdl.FPoint{X: float32(p.X), Y: float32(p.Y)}
+}
 
 // InRect returns a bool indicating whether the X and Y values of Point are
 // within the sdl.Rect.

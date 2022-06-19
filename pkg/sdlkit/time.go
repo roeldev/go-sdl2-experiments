@@ -33,6 +33,7 @@ type Clock struct {
 	Delta32 float32
 }
 
+// todo: clock aanmaken via Time.CreateClock
 func NewClock() *Clock {
 	return &Clock{TimeScale: DefaultTimeScale}
 }

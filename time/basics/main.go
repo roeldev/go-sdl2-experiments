@@ -11,7 +11,7 @@ import (
 
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit"
 
-	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit-examples/internal"
+	"github.com/roeldev/go-sdl2-experiments/internal"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/colors"
 )
 
