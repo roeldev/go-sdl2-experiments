@@ -10,11 +10,11 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit"
-	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit-examples/tanks/internal/tank"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/display"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/ecs"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/event"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/input"
+	"github.com/roeldev/go-sdl2-experiments/tanks/internal/tank"
 )
 
 const (

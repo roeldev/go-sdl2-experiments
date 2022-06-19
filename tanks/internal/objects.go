@@ -1,10 +1,10 @@
 package internal
 
 import (
-	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit-examples/tanks/internal/tank"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/geom"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/geom/align"
 	"github.com/roeldev/go-sdl2-experiments/pkg/sdlkit/physics"
+	"github.com/roeldev/go-sdl2-experiments/tanks/internal/tank"
 )
 
 func (game *tanksGame) addPlayer(color tank.Color, control tank.Control) *tank.Tank {
